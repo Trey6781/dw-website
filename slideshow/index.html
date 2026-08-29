@@ -1,0 +1,1325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%2315161a'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%23ffb347'/%3E%3Ccircle cx='12.5' cy='12.5' r='3.5' fill='%23fff6e2'/%3E%3C/svg%3E" />
+<title>The Carousel — Family Slide Projector</title>
+<meta name="description" content="An old-school carousel slide projector for your family photos. Runs entirely on your own device." />
+<style>
+  :root{
+    --amber:#ffb347;
+    --amber-deep:#e2851c;
+    --lamp:#fff3d6;
+    --ink:#0a0a0b;
+    --panel:#15161a;
+    --panel-2:#1e2026;
+    --line:#33363f;
+    --txt:#e9e6df;
+    --txt-soft:#9a9daa;
+    --advance:560ms;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:#000;
+    color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior:none;
+  }
+  body.idle{cursor:none}
+
+  /* =========================================================
+     THE ROOM — a dark space with the projector behind you
+     ========================================================= */
+  #room{
+    position:fixed;inset:0;
+    background:
+      radial-gradient(120% 90% at 50% 42%, #17161a 0%, #0b0b0d 55%, #050506 100%);
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  /* The cone of light thrown from the back of the room */
+  #beam{
+    position:absolute;inset:0;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .8s ease;
+    background:
+      radial-gradient(58% 46% at 50% 50%, rgba(255,238,205,.13) 0%, rgba(255,231,190,.05) 45%, transparent 72%);
+    mix-blend-mode:screen;
+  }
+  body.running #beam{opacity:1}
+
+  /* =========================================================
+     THE SCREEN — where the slide lands
+     ========================================================= */
+  #screen{
+    position:relative;
+    width:min(90vw, 160vh);
+    height:min(84vh, 100vw);
+    display:flex;align-items:center;justify-content:center;
+    /* gate weave: the gentle mechanical drift of a real projector */
+    animation:weave 7.3s ease-in-out infinite;
+    will-change:transform;
+  }
+  @keyframes weave{
+    0%   {transform:translate3d(0,0,0)            rotate(0deg)}
+    17%  {transform:translate3d(.14%,-.1%,0)      rotate(.045deg)}
+    38%  {transform:translate3d(-.1%,.13%,0)      rotate(-.03deg)}
+    59%  {transform:translate3d(.08%,.09%,0)      rotate(.05deg)}
+    81%  {transform:translate3d(-.13%,-.06%,0)    rotate(-.04deg)}
+    100% {transform:translate3d(0,0,0)            rotate(0deg)}
+  }
+  body.no-fx #screen{animation:none}
+
+  .slide{
+    position:absolute;
+    max-width:100%;max-height:100%;
+    width:auto;height:auto;
+    object-fit:contain;
+    /* the warm halation of a hot tungsten lamp through film */
+    filter:saturate(1.06) contrast(1.04) brightness(1.03);
+    box-shadow:
+      0 0 0 clamp(6px,1.1vh,14px) #f4f1e8,          /* the cardboard slide mount */
+      0 0 0 clamp(7px,1.25vh,16px) #cfcabb,
+      0 0 90px 20px rgba(255,226,178,.20),           /* light spill onto the wall */
+      0 24px 70px rgba(0,0,0,.75);
+    background:#000;
+    opacity:0;
+    will-change:transform,opacity,filter;
+    backface-visibility:hidden;
+  }
+  body.no-mount .slide{
+    box-shadow:0 0 90px 20px rgba(255,226,178,.16), 0 24px 70px rgba(0,0,0,.75);
+  }
+
+  /* --- The carousel advance: slide drops out, next drops in --- */
+  .slide.live{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0) saturate(1.06) contrast(1.04) brightness(1.03)}
+  .slide.enter{
+    opacity:0;transform:translate3d(0,-7%,0) scale(1.015);
+    filter:blur(7px) brightness(1.5) saturate(.85);
+  }
+  .slide.entering{
+    opacity:1;transform:translate3d(0,0,0) scale(1);
+    filter:blur(0) saturate(1.06) contrast(1.04) brightness(1.03);
+    transition:
+      transform var(--advance) cubic-bezier(.16,1.24,.36,1),
+      opacity 190ms ease-out,
+      filter 300ms ease-out;
+  }
+  .slide.exiting{
+    opacity:0;transform:translate3d(0,9%,0) scale(.985);
+    filter:blur(9px) brightness(.55);
+    transition:transform 230ms cubic-bezier(.5,0,.9,.4), opacity 200ms ease-in, filter 230ms ease-in;
+  }
+  /* Reverse (going back up the tray) */
+  .slide.enter.rev{transform:translate3d(0,7%,0) scale(1.015)}
+  .slide.exiting.rev{transform:translate3d(0,-9%,0) scale(.985)}
+
+  /* Dissolve mode — the gentler, lap-dissolve projector */
+  body.mode-dissolve .slide.enter{transform:none;filter:blur(0) brightness(1.12)}
+  body.mode-dissolve .slide.entering{transition:opacity 1.5s ease, filter 1.5s ease, transform 6s linear}
+  body.mode-dissolve .slide.exiting{transform:none;filter:blur(0) brightness(1);transition:opacity 1.5s ease}
+
+  /* Ken Burns — the slow creep across the picture */
+  body.kb .slide.live.kb-a{animation:kbA var(--kbdur,14s) linear forwards}
+  body.kb .slide.live.kb-b{animation:kbB var(--kbdur,14s) linear forwards}
+  body.kb .slide.live.kb-c{animation:kbC var(--kbdur,14s) linear forwards}
+  @keyframes kbA{from{transform:scale(1) translate3d(0,0,0)}    to{transform:scale(1.085) translate3d(-1.1%,-.9%,0)}}
+  @keyframes kbB{from{transform:scale(1.07) translate3d(1%,.8%,0)} to{transform:scale(1) translate3d(0,0,0)}}
+  @keyframes kbC{from{transform:scale(1.01) translate3d(1.2%,-.6%,0)} to{transform:scale(1.075) translate3d(-.8%,.7%,0)}}
+
+  /* =========================================================
+     GATE ARTIFACTS — dust, hairs, grain, flicker, vignette
+     ========================================================= */
+  #dust{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;opacity:.5;mix-blend-mode:screen}
+  body.no-fx #dust{display:none}
+
+  #grain{
+    position:fixed;inset:-120px;pointer-events:none;z-index:6;
+    opacity:.24;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='220' height='220' filter='url(%23n)' opacity='.62'/></svg>");
+    animation:grainShift .5s steps(1) infinite;
+  }
+  @keyframes grainShift{
+    0%{transform:translate3d(0,0,0)}      12%{transform:translate3d(-3%,-2%,0)}
+    25%{transform:translate3d(2%,-4%,0)}  37%{transform:translate3d(-4%,3%,0)}
+    50%{transform:translate3d(3%,2%,0)}   62%{transform:translate3d(-2%,4%,0)}
+    75%{transform:translate3d(4%,-3%,0)}  87%{transform:translate3d(-3%,1%,0)}
+    100%{transform:translate3d(0,0,0)}
+  }
+  body.no-fx #grain{display:none}
+
+  /* The blackout as the tray rotates and the gate is empty */
+  #gate{
+    position:fixed;inset:0;z-index:5;pointer-events:none;
+    background:#000;opacity:0;
+  }
+  #gate.blink{animation:gateBlink var(--advance) ease-out}
+  @keyframes gateBlink{
+    0%{opacity:0} 16%{opacity:.88} 34%{opacity:.9} 100%{opacity:0}
+  }
+  body.mode-dissolve #gate.blink{animation:none}
+
+  /* Lamp flicker + vignette + the edges of the throw */
+  #vignette{
+    position:fixed;inset:0;z-index:4;pointer-events:none;
+    background:radial-gradient(120% 100% at 50% 50%, transparent 42%, rgba(0,0,0,.42) 78%, rgba(0,0,0,.82) 100%);
+  }
+  body.running #room{animation:lamp 4.1s ease-in-out infinite}
+  @keyframes lamp{
+    0%,100%{filter:brightness(1)}
+    23%{filter:brightness(1.018)}
+    47%{filter:brightness(.988)}
+    71%{filter:brightness(1.011)}
+  }
+  body.no-fx #room{animation:none}
+  body.no-fx #vignette{background:radial-gradient(120% 100% at 50% 50%, transparent 60%, rgba(0,0,0,.5) 100%)}
+
+  /* =========================================================
+     DATE STAMP — the little orange burn-in from the film back
+     ========================================================= */
+  #stamp{
+    position:absolute;right:clamp(14px,3vw,44px);bottom:clamp(12px,2.6vh,38px);
+    z-index:7;pointer-events:none;
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:clamp(13px,1.9vh,22px);font-weight:700;letter-spacing:2.5px;
+    color:#ff9a2e;
+    text-shadow:0 0 10px rgba(255,140,20,.85),0 0 26px rgba(255,110,0,.5);
+    opacity:0;transition:opacity .5s ease .25s;
+  }
+  #stamp.on{opacity:.92}
+
+  #caption{
+    position:absolute;left:50%;transform:translateX(-50%);
+    bottom:clamp(12px,2.6vh,38px);z-index:7;pointer-events:none;
+    font-size:clamp(12px,1.7vh,19px);font-weight:600;letter-spacing:.4px;
+    color:rgba(255,244,225,.72);text-shadow:0 2px 14px rgba(0,0,0,.9);
+    max-width:60vw;text-align:center;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    opacity:0;transition:opacity .5s ease .25s;
+  }
+  #caption.on{opacity:1}
+
+  /* =========================================================
+     CONTROLS — auto-hiding, big enough for a TV across the room
+     ========================================================= */
+  #ui{
+    position:fixed;left:0;right:0;bottom:0;z-index:10;
+    padding:16px clamp(12px,3vw,32px) clamp(16px,3vh,28px);
+    background:linear-gradient(180deg,transparent,rgba(0,0,0,.55) 40%,rgba(0,0,0,.86));
+    display:flex;flex-direction:column;gap:12px;align-items:center;
+    transition:opacity .35s ease,transform .35s ease;
+  }
+  body.idle #ui{opacity:0;transform:translateY(14px);pointer-events:none}
+
+  #track{
+    width:100%;max-width:1100px;height:5px;border-radius:99px;
+    background:rgba(255,255,255,.13);overflow:hidden;
+  }
+  #track i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--amber-deep),var(--amber));
+    box-shadow:0 0 12px rgba(255,170,60,.6);transition:width .18s linear}
+
+  #bar{display:flex;align-items:center;gap:clamp(6px,1.2vw,14px);flex-wrap:wrap;justify-content:center}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    min-width:52px;height:52px;padding:0 16px;
+    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);
+    border-radius:12px;color:var(--txt);font-size:15px;font-weight:650;
+    cursor:pointer;transition:background .14s,border-color .14s,transform .1s;
+    user-select:none;-webkit-tap-highlight-color:transparent;
+  }
+  .btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.28)}
+  .btn:active{transform:scale(.95)}
+  .btn:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+  .btn.on{background:rgba(255,179,71,.2);border-color:rgba(255,179,71,.6);color:#ffd9a3}
+  .btn.big{min-width:66px;height:66px;font-size:19px;background:rgba(255,179,71,.16);border-color:rgba(255,179,71,.42)}
+  .btn.big:hover{background:rgba(255,179,71,.26)}
+  .btn svg{width:22px;height:22px;fill:currentColor;flex:0 0 auto}
+  .btn.big svg{width:28px;height:28px}
+  .btn .lbl{display:inline}
+  @media (max-width:760px){ .btn .lbl{display:none} .btn{padding:0 12px;min-width:48px;height:48px} }
+
+  #counter{
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;
+    color:var(--txt-soft);min-width:92px;text-align:center;letter-spacing:1px;
+  }
+  .sep{width:1px;height:30px;background:rgba(255,255,255,.14);margin:0 4px}
+
+  select,input[type=range]{accent-color:var(--amber)}
+  select{
+    height:52px;padding:0 12px;border-radius:12px;font-size:15px;font-weight:600;
+    background:rgba(255,255,255,.07);color:var(--txt);
+    border:1px solid rgba(255,255,255,.14);cursor:pointer;
+  }
+  select:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+
+  /* =========================================================
+     THE TRAY — load screen
+     ========================================================= */
+  #tray{
+    position:fixed;inset:0;z-index:30;
+    display:flex;align-items:center;justify-content:center;
+    padding:24px;
+    background:radial-gradient(90% 80% at 50% 30%, #1b1c21 0%, #0a0a0c 70%);
+    transition:opacity .5s ease,visibility .5s;
+  }
+  #tray.hidden{opacity:0;visibility:hidden;pointer-events:none}
+  #tray.drop{background:radial-gradient(90% 80% at 50% 30%, #2a2415 0%, #0a0a0c 70%)}
+  .panel{
+    width:min(620px,100%);text-align:center;
+  }
+  .lens{
+    width:96px;height:96px;margin:0 auto 26px;border-radius:50%;
+    background:radial-gradient(circle at 38% 34%, #fff6e2 0%, var(--amber) 26%, #6b4415 62%, #17110a 100%);
+    box-shadow:0 0 0 8px #202228, 0 0 0 10px #34373f, 0 0 70px 12px rgba(255,170,60,.42);
+    animation:hum 3.6s ease-in-out infinite;
+  }
+  @keyframes hum{0%,100%{box-shadow:0 0 0 8px #202228,0 0 0 10px #34373f,0 0 70px 12px rgba(255,170,60,.42)}
+                 50%{box-shadow:0 0 0 8px #202228,0 0 0 10px #34373f,0 0 92px 18px rgba(255,170,60,.6)}}
+  #tray h1{
+    font-size:clamp(28px,4.4vw,44px);font-weight:800;letter-spacing:-.6px;line-height:1.1;
+    color:#fff;
+  }
+  #tray h1 em{color:var(--amber);font-style:normal}
+  #tray .sub{margin-top:14px;color:#a3a7b2;font-size:clamp(15px,2vw,18px);line-height:1.6}
+  #tray .sub b{color:#dcdfe6;font-weight:650}
+  #load{
+    margin-top:32px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;
+  }
+  .cta{
+    display:inline-flex;align-items:center;gap:10px;
+    height:60px;padding:0 28px;border-radius:14px;
+    font-size:17px;font-weight:750;cursor:pointer;border:1px solid transparent;
+    transition:transform .12s,background .15s,border-color .15s;
+  }
+  .cta:hover{transform:translateY(-2px)}
+  .cta:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+  .cta-primary{background:var(--amber);color:#2a1a05}
+  .cta-primary:hover{background:#ffc266}
+  .cta-ghost{background:rgba(255,255,255,.06);color:var(--txt);border-color:rgba(255,255,255,.18)}
+  .cta-ghost:hover{background:rgba(255,255,255,.13)}
+  .cta svg{width:22px;height:22px;fill:currentColor}
+  .hint{margin-top:26px;font-size:13.5px;color:#70747f;line-height:1.7}
+  .hint kbd{
+    display:inline-block;padding:2px 7px;margin:0 1px;border-radius:5px;
+    background:#24262c;border:1px solid #383b44;border-bottom-width:2px;
+    font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#c8ccd4;
+  }
+  .privacy{
+    margin-top:22px;display:inline-flex;align-items:center;gap:9px;
+    padding:10px 16px;border-radius:99px;
+    background:rgba(90,200,120,.09);border:1px solid rgba(90,200,120,.24);
+    color:#8fd6a4;font-size:13.5px;font-weight:600;
+  }
+  .privacy svg{width:16px;height:16px;fill:currentColor;flex:0 0 auto}
+  #err{margin-top:18px;color:#ff9a9a;font-size:14px;line-height:1.6;display:none}
+  #err.on{display:block}
+  input[type=file]{display:none}
+
+  #toast{
+    position:fixed;top:26px;left:50%;transform:translateX(-50%) translateY(-16px);
+    z-index:40;padding:12px 22px;border-radius:12px;
+    background:rgba(20,21,25,.94);border:1px solid rgba(255,255,255,.16);
+    color:var(--txt);font-size:15px;font-weight:650;letter-spacing:.2px;
+    opacity:0;transition:opacity .25s ease,transform .25s ease;pointer-events:none;
+    box-shadow:0 12px 40px rgba(0,0,0,.6);
+  }
+  #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media (prefers-reduced-motion:reduce){
+    #screen{animation:none}
+    #grain{animation:none}
+    .slide.entering,.slide.exiting{transition-duration:220ms}
+    body.running #room{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<div id="room">
+  <div id="beam"></div>
+  <div id="screen">
+    <canvas id="dust"></canvas>
+    <div id="stamp"></div>
+    <div id="caption"></div>
+  </div>
+</div>
+
+<div id="gate"></div>
+<div id="vignette"></div>
+<div id="grain"></div>
+
+<!-- ============ CONTROLS ============ -->
+<div id="ui">
+  <div id="track"><i></i></div>
+  <div id="bar">
+    <button class="btn" id="bPrev" title="Previous (←)" aria-label="Previous slide">
+      <svg viewBox="0 0 24 24"><path d="M17 4v16L7 12zM6 4h2v16H6z"/></svg>
+    </button>
+    <button class="btn big" id="bPlay" title="Play / Pause (Space)" aria-label="Play or pause">
+      <svg viewBox="0 0 24 24" id="icPlay"><path d="M7 4l13 8-13 8z"/></svg>
+      <svg viewBox="0 0 24 24" id="icPause" style="display:none"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+    </button>
+    <button class="btn" id="bNext" title="Next (→)" aria-label="Next slide">
+      <svg viewBox="0 0 24 24"><path d="M7 4v16l10-8zM16 4h2v16h-2z"/></svg>
+    </button>
+
+    <div id="counter">— / —</div>
+    <div class="sep"></div>
+
+    <select id="speed" title="Seconds per slide" aria-label="Seconds per slide">
+      <option value="3000">3s</option>
+      <option value="5000">5s</option>
+      <option value="7000" selected>7s</option>
+      <option value="10000">10s</option>
+      <option value="15000">15s</option>
+      <option value="30000">30s</option>
+    </select>
+
+    <select id="order" title="Order" aria-label="Slide order">
+      <option value="date">Oldest first</option>
+      <option value="date-desc">Newest first</option>
+      <option value="name">By file name</option>
+      <option value="shuffle">Shuffle</option>
+    </select>
+
+    <div class="sep"></div>
+
+    <button class="btn on" id="bSound" title="Projector sound (M)" aria-label="Toggle projector sound">
+      <svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16.5 12a3.5 3.5 0 00-2-3.15v6.3A3.5 3.5 0 0016.5 12zm-2 6.9a7 7 0 000-13.8v1.6a5.4 5.4 0 010 10.6z"/></svg>
+    </button>
+    <button class="btn on" id="bFx" title="Film grain &amp; dust (G)" aria-label="Toggle film grain and dust">
+      <svg viewBox="0 0 24 24"><path d="M12 2l2.2 5.2L20 8l-4 3.9.9 5.6L12 15l-4.9 2.5.9-5.6L4 8l5.8-.8z"/></svg>
+    </button>
+    <button class="btn on" id="bKb" title="Slow zoom (K)" aria-label="Toggle slow zoom">
+      <svg viewBox="0 0 24 24"><path d="M10 3a7 7 0 105.3 11.6l4.6 4.6 1.4-1.4-4.6-4.6A7 7 0 0010 3zm0 2a5 5 0 110 10 5 5 0 010-10zm-1 2v2H7v2h2v2h2v-2h2V9h-2V7z"/></svg>
+    </button>
+    <button class="btn" id="bMode" title="Advance style (D)" aria-label="Toggle advance style">
+      <svg viewBox="0 0 24 24"><path d="M4 5h16v2H4zm0 6h16v2H4zm0 6h16v2H4z"/></svg><span class="lbl">Clunk</span>
+    </button>
+
+    <div class="sep"></div>
+
+    <button class="btn" id="bFull" title="Full screen (F)" aria-label="Full screen">
+      <svg viewBox="0 0 24 24"><path d="M4 4h6v2H6v4H4zm10 0h6v6h-2V6h-4zM4 14h2v4h4v2H4zm14 0h2v6h-6v-2h4z"/></svg>
+      <span class="lbl">Full screen</span>
+    </button>
+    <button class="btn" id="bTray" title="Load different photos (L)" aria-label="Load different photos">
+      <svg viewBox="0 0 24 24"><path d="M10 4l2 2h8a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+      <span class="lbl">Photos</span>
+    </button>
+  </div>
+</div>
+
+<!-- ============ LOAD SCREEN ============ -->
+<div id="tray">
+  <div class="panel">
+    <div class="lens"></div>
+    <h1>The <em>Carousel</em></h1>
+    <p class="sub">
+      Load a folder of family photos and watch them the old way —
+      <b>ka-chunk</b>, one slide at a time, dust and all.
+    </p>
+
+    <div id="load">
+      <button class="cta cta-primary" id="pickFolder">
+        <svg viewBox="0 0 24 24"><path d="M10 4l2 2h8a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+        Choose a photo folder
+      </button>
+      <button class="cta cta-ghost" id="pickFiles">
+        <svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5z"/></svg>
+        Pick individual photos
+      </button>
+    </div>
+
+    <div class="privacy">
+      <svg viewBox="0 0 24 24"><path d="M12 1l9 4v6c0 5.2-3.8 9.9-9 11-5.2-1.1-9-5.8-9-11V5zm0 6a2 2 0 00-2 2v1H9v5h6v-5h-1V9a2 2 0 00-2-2zm0 1.5A.5.5 0 0112.5 9v1h-1V9a.5.5 0 01.5-.5z"/></svg>
+      Your photos never leave this device — nothing is uploaded.
+    </div>
+
+    <p class="hint">
+      …or just drag a folder anywhere onto this page.<br><br>
+      <kbd>Space</kbd> play/pause &nbsp; <kbd>←</kbd> <kbd>→</kbd> back/forward &nbsp;
+      <kbd>F</kbd> full screen &nbsp; <kbd>M</kbd> sound &nbsp; <kbd>G</kbd> grain &nbsp; <kbd>K</kbd> zoom
+    </p>
+
+    <div id="err"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<input type="file" id="fileFolder" webkitdirectory directory multiple accept="image/*" />
+<input type="file" id="fileList" multiple accept="image/*" />
+
+<script>
+(function(){
+"use strict";
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+var photos   = [];      /* {name, date, url|file, objectUrl, caption} */
+var order    = [];      /* indices into photos, in display order      */
+var pos      = -1;      /* position within `order`                    */
+var playing  = false;
+var timer    = null;
+var busy     = false;
+var liveEl   = null;
+var kbSeq    = 0;
+
+var S = {
+  speed: 7000,
+  sort: 'date',
+  sound: true,
+  fx: true,
+  kb: true,
+  mode: 'clunk'
+};
+
+var $ = function(id){ return document.getElementById(id); };
+var body = document.body;
+
+/* =====================================================================
+   SETTINGS PERSISTENCE  (best-effort — private windows can throw)
+   ===================================================================== */
+function loadSettings(){
+  try{
+    var raw = localStorage.getItem('carousel.settings');
+    if(raw){ var o = JSON.parse(raw); for(var k in S){ if(o[k] !== undefined) S[k] = o[k]; } }
+  }catch(e){}
+}
+function saveSettings(){
+  try{ localStorage.setItem('carousel.settings', JSON.stringify(S)); }catch(e){}
+}
+
+/* =====================================================================
+   PROJECTOR SOUND — synthesized, so there are no audio files to ship
+   ===================================================================== */
+var actx = null, fanGain = null, fanNodes = [];
+
+function audio(){
+  if(actx) return actx;
+  try{
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    actx = new AC();
+  }catch(e){ return null; }
+  return actx;
+}
+
+function noiseBuffer(ctx, seconds){
+  var len = Math.floor(ctx.sampleRate * seconds);
+  var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  var d = buf.getChannelData(0);
+  for(var i=0;i<len;i++) d[i] = Math.random()*2 - 1;
+  return buf;
+}
+
+/* The cooling fan and lamp hum you hear all through the show */
+function startFan(){
+  var ctx = audio(); if(!ctx || fanGain) return;
+  if(ctx.state === 'suspended') ctx.resume();
+
+  fanGain = ctx.createGain();
+  fanGain.gain.value = 0;
+  fanGain.connect(ctx.destination);
+
+  var src = ctx.createBufferSource();
+  src.buffer = noiseBuffer(ctx, 3);
+  src.loop = true;
+  var lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.value = 420; lp.Q.value = .5;
+  var air = ctx.createGain(); air.gain.value = .5;
+  src.connect(lp); lp.connect(air); air.connect(fanGain);
+  src.start();
+
+  /* the motor's low tone underneath the air */
+  var osc = ctx.createOscillator();
+  osc.type = 'triangle'; osc.frequency.value = 88;
+  var og = ctx.createGain(); og.gain.value = .028;
+  osc.connect(og); og.connect(fanGain);
+  osc.start();
+
+  fanNodes = [src, osc];
+  fanGain.gain.setTargetAtTime(S.sound ? .1 : 0, ctx.currentTime, .8);
+}
+function fanLevel(on){
+  if(!fanGain || !actx) return;
+  fanGain.gain.setTargetAtTime(on ? .1 : 0, actx.currentTime, .35);
+}
+function stopFan(){
+  if(!fanGain) return;
+  fanLevel(false);
+  var nodes = fanNodes, g = fanGain;
+  fanGain = null; fanNodes = [];
+  setTimeout(function(){
+    nodes.forEach(function(n){ try{ n.stop(); }catch(e){} });
+    try{ g.disconnect(); }catch(e){}
+  }, 900);
+}
+
+/* The ka-CHUNK: a solenoid snap, a wooden thunk, and the tray's rattle */
+function clunk(){
+  var ctx = audio(); if(!ctx || !S.sound) return;
+  if(ctx.state === 'suspended') ctx.resume();
+  var t = ctx.currentTime;
+
+  /* 1. the snap of the mechanism releasing */
+  var s = ctx.createBufferSource();
+  s.buffer = noiseBuffer(ctx, .2);
+  var sf = ctx.createBiquadFilter();
+  sf.type = 'bandpass'; sf.frequency.value = 2400; sf.Q.value = 1.1;
+  var sg = ctx.createGain();
+  sg.gain.setValueAtTime(.0001, t);
+  sg.gain.exponentialRampToValueAtTime(.32, t + .006);
+  sg.gain.exponentialRampToValueAtTime(.0001, t + .085);
+  s.connect(sf); sf.connect(sg); sg.connect(ctx.destination);
+  s.start(t); s.stop(t + .22);
+
+  /* 2. the slide landing in the gate — a low wooden thunk */
+  var o = ctx.createOscillator();
+  o.type = 'triangle';
+  o.frequency.setValueAtTime(168, t + .012);
+  o.frequency.exponentialRampToValueAtTime(52, t + .17);
+  var og = ctx.createGain();
+  og.gain.setValueAtTime(.0001, t + .012);
+  og.gain.exponentialRampToValueAtTime(.3, t + .026);
+  og.gain.exponentialRampToValueAtTime(.0001, t + .3);
+  o.connect(og); og.connect(ctx.destination);
+  o.start(t + .012); o.stop(t + .34);
+
+  /* 3. the tray rattling on round */
+  var r = ctx.createBufferSource();
+  r.buffer = noiseBuffer(ctx, .3);
+  var rf = ctx.createBiquadFilter();
+  rf.type = 'bandpass'; rf.frequency.value = 780; rf.Q.value = .8;
+  var rg = ctx.createGain();
+  rg.gain.setValueAtTime(.0001, t + .03);
+  rg.gain.exponentialRampToValueAtTime(.1, t + .07);
+  rg.gain.exponentialRampToValueAtTime(.0001, t + .27);
+  r.connect(rf); rf.connect(rg); rg.connect(ctx.destination);
+  r.start(t + .03); r.stop(t + .32);
+}
+
+/* =====================================================================
+   DUST, HAIRS AND SCRATCHES ON THE GATE
+   Redrawn on every advance, the way real grit shifts between slides.
+   ===================================================================== */
+var dustCv = $('dust'), dustCtx = dustCv.getContext('2d');
+
+function sizeDust(){
+  var r = dustCv.getBoundingClientRect();
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  dustCv.width  = Math.max(1, Math.round(r.width  * dpr));
+  dustCv.height = Math.max(1, Math.round(r.height * dpr));
+  drawDust();
+}
+
+function drawDust(){
+  var w = dustCv.width, h = dustCv.height;
+  if(!w || !h) return;
+  dustCtx.clearRect(0, 0, w, h);
+  if(!S.fx) return;
+
+  /* specks */
+  var specks = 26 + Math.floor(Math.random() * 22);
+  for(var i=0;i<specks;i++){
+    var x = Math.random()*w, y = Math.random()*h;
+    var rr = (Math.random()*1.6 + .35) * (w/1400) * 2.2;
+    dustCtx.beginPath();
+    dustCtx.arc(x, y, Math.max(.6, rr), 0, 6.284);
+    dustCtx.fillStyle = 'rgba(255,252,242,' + (.1 + Math.random()*.3).toFixed(3) + ')';
+    dustCtx.fill();
+  }
+
+  /* a hair or two caught in the gate, hanging in from an edge */
+  var hairs = Math.random() < .55 ? 1 : (Math.random() < .3 ? 2 : 0);
+  for(var k=0;k<hairs;k++){
+    var edge = Math.floor(Math.random()*4);
+    var sx, sy;
+    if(edge === 0){ sx = Math.random()*w; sy = 0; }
+    else if(edge === 1){ sx = w; sy = Math.random()*h; }
+    else if(edge === 2){ sx = Math.random()*w; sy = h; }
+    else { sx = 0; sy = Math.random()*h; }
+    dustCtx.beginPath();
+    dustCtx.moveTo(sx, sy);
+    var cx1 = sx + (Math.random()-.5)*w*.3, cy1 = sy + (Math.random()-.5)*h*.3;
+    var cx2 = sx + (Math.random()-.5)*w*.35, cy2 = sy + (Math.random()-.5)*h*.35;
+    var ex  = sx + (Math.random()-.5)*w*.24, ey = sy + (Math.random()-.5)*h*.24;
+    dustCtx.bezierCurveTo(cx1, cy1, cx2, cy2, ex, ey);
+    dustCtx.strokeStyle = 'rgba(255,250,238,.28)';
+    dustCtx.lineWidth = Math.max(1, (w/1400) * 1.6);
+    dustCtx.stroke();
+  }
+
+  /* an occasional vertical scratch down the frame */
+  if(Math.random() < .3){
+    var sxp = Math.random()*w;
+    dustCtx.beginPath();
+    dustCtx.moveTo(sxp, 0);
+    dustCtx.lineTo(sxp + (Math.random()-.5)*22, h);
+    dustCtx.strokeStyle = 'rgba(255,250,240,.11)';
+    dustCtx.lineWidth = Math.max(1, (w/1400)*1.2);
+    dustCtx.stroke();
+  }
+}
+
+/* =====================================================================
+   EXIF — pull DateTimeOriginal so slides run in the order they happened
+   Reads only the front of the file; falls back to the file's own date.
+   ===================================================================== */
+function readTaken(file){
+  return new Promise(function(resolve){
+    var fallback = file.lastModified || 0;
+    if(!/jpe?g$/i.test(file.name) && file.type !== 'image/jpeg') return resolve(fallback);
+
+    var reader = new FileReader();
+    reader.onerror = function(){ resolve(fallback); };
+    reader.onload = function(){
+      try{
+        var v  = new DataView(reader.result);
+        var len = v.byteLength;
+        if(len < 12 || v.getUint16(0) !== 0xFFD8) return resolve(fallback);
+
+        /* walk the JPEG markers looking for APP1/Exif */
+        var off = 2, app1 = -1;
+        while(off + 4 < len){
+          if(v.getUint8(off) !== 0xFF) break;
+          var marker = v.getUint8(off + 1);
+          var size   = v.getUint16(off + 2);
+          if(marker === 0xE1 && off + 10 < len && v.getUint32(off + 4) === 0x45786966){
+            app1 = off + 10; break;
+          }
+          if(marker === 0xDA) break;          /* start of scan — no Exif */
+          if(size < 2) break;
+          off += 2 + size;
+        }
+        if(app1 < 0 || app1 + 8 > len) return resolve(fallback);
+
+        var little = v.getUint16(app1) === 0x4949;
+        if(v.getUint16(app1 + 2, little) !== 0x002A) return resolve(fallback);
+        var ifd0 = app1 + v.getUint32(app1 + 4, little);
+        if(ifd0 + 2 > len) return resolve(fallback);
+
+        var best = 0;
+
+        function scanIFD(base){
+          if(base + 2 > len) return 0;
+          var n = v.getUint16(base, little), found = 0;
+          for(var i=0;i<n;i++){
+            var e = base + 2 + i*12;
+            if(e + 12 > len) break;
+            var tag = v.getUint16(e, little);
+            if(tag === 0x9003 || tag === 0x9004 || tag === 0x0132){        /* Original / Digitized / ModifyDate */
+              var count = v.getUint32(e + 4, little);
+              var ptr   = app1 + v.getUint32(e + 8, little);
+              if(count >= 19 && ptr + 19 <= len){
+                var s = '';
+                for(var c=0;c<19;c++) s += String.fromCharCode(v.getUint8(ptr + c));
+                var ts = parseExifDate(s);
+                /* 0x9003 wins over the others */
+                if(ts && (tag === 0x9003 || !found)) found = ts;
+              }
+            }
+            if(tag === 0x8769){                                             /* pointer to the Exif sub-IFD */
+              var sub = app1 + v.getUint32(e + 8, little);
+              var subFound = scanIFD(sub);
+              if(subFound) found = subFound;
+            }
+          }
+          return found;
+        }
+
+        best = scanIFD(ifd0);
+        resolve(best || fallback);
+      }catch(e){ resolve(fallback); }
+    };
+    reader.readAsArrayBuffer(file.slice(0, 262144));
+  });
+}
+
+function parseExifDate(s){
+  /* "2014:07:21 18:03:44" */
+  var m = /^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/.exec(s);
+  if(!m) return 0;
+  var y = +m[1];
+  if(y < 1900 || y > 2200) return 0;
+  var d = new Date(y, +m[2]-1, +m[3], +m[4], +m[5], +m[6]);
+  var t = d.getTime();
+  return isNaN(t) ? 0 : t;
+}
+
+/* =====================================================================
+   LOADING PHOTOS
+   ===================================================================== */
+var IMG_RE = /\.(jpe?g|png|gif|webp|avif|bmp|svg)$/i;
+var HEIC_RE = /\.(heic|heif)$/i;
+
+function isImage(f){
+  if(!f) return false;
+  if(f.type && f.type.indexOf('image/') === 0) return true;
+  return IMG_RE.test(f.name || '');
+}
+
+function showErr(html){
+  var e = $('err');
+  if(!html){ e.className = ''; e.innerHTML = ''; return; }
+  e.className = 'on'; e.innerHTML = html;
+}
+
+async function ingest(files){
+  showErr('');
+  var list = [], heic = 0, skipped = 0;
+
+  for(var i=0;i<files.length;i++){
+    var f = files[i];
+    if(!f) continue;
+    if(HEIC_RE.test(f.name || '')){ heic++; continue; }
+    if(!isImage(f)){ skipped++; continue; }
+    if(/^\./.test(f.name || '')) continue;                 /* macOS ._ sidecars etc. */
+    list.push(f);
+  }
+
+  if(!list.length){
+    var msg = 'No photos found in that selection.';
+    if(heic) msg += '<br><br><b>' + heic + ' HEIC file' + (heic===1?'':'s') +
+      ' were skipped.</b> Most browsers can\'t display Apple\'s HEIC format. ' +
+      'On iPhone: <i>Settings → Camera → Formats → Most Compatible</i> saves new photos as JPEG, ' +
+      'or export the existing ones as JPEG first.';
+    showErr(msg);
+    return;
+  }
+
+  toast('Reading ' + list.length + ' photos…');
+
+  /* Pull capture dates a chunk at a time so a big folder stays responsive */
+  var out = new Array(list.length);
+  var CHUNK = 24;
+  for(var s=0; s<list.length; s+=CHUNK){
+    var slice = list.slice(s, s+CHUNK);
+    var dates = await Promise.all(slice.map(readTaken));
+    for(var j=0;j<slice.length;j++){
+      out[s+j] = {
+        name: slice[j].name,
+        file: slice[j],
+        url: null,
+        objectUrl: null,
+        date: dates[j] || 0,
+        broken: false
+      };
+    }
+  }
+
+  photos = out;
+  finishLoad(heic, skipped);
+}
+
+function finishLoad(heic, skipped){
+  buildOrder();
+  pos = -1;
+  $('tray').className = 'hidden';
+  body.classList.add('running');
+  updateCounter();
+  startFan();
+  var note = photos.length + ' photos loaded';
+  if(heic) note += ' · ' + heic + ' HEIC skipped';
+  toast(note);
+  next(1, true);
+  play();
+}
+
+/* Optional: photos.json sitting next to this page, for a committed album.
+   Format: ["a.jpg","b.jpg"]  or  [{"src":"a.jpg","caption":"Beach, 2011"}] */
+async function tryManifest(){
+  try{
+    var res = await fetch('photos.json', {cache:'no-cache'});
+    if(!res.ok) return false;
+    var data = await res.json();
+    if(!Array.isArray(data) || !data.length) return false;
+    photos = data.map(function(item, i){
+      var src = typeof item === 'string' ? item : item.src;
+      return {
+        name: (src || '').split('/').pop(),
+        file: null,
+        url: src,
+        objectUrl: null,
+        date: (typeof item === 'object' && item.date) ? Date.parse(item.date) || 0 : i,
+        caption: (typeof item === 'object' && item.caption) ? item.caption : '',
+        broken: false
+      };
+    }).filter(function(p){ return !!p.url; });
+    if(!photos.length) return false;
+    finishLoad(0, 0);
+    return true;
+  }catch(e){ return false; }
+}
+
+/* =====================================================================
+   ORDERING
+   ===================================================================== */
+function buildOrder(){
+  order = photos.map(function(_, i){ return i; });
+
+  if(S.sort === 'shuffle'){
+    for(var i=order.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t = order[i]; order[i] = order[j]; order[j] = t;
+    }
+    return;
+  }
+  if(S.sort === 'name'){
+    var coll = new Intl.Collator(undefined, {numeric:true, sensitivity:'base'});
+    order.sort(function(a,b){ return coll.compare(photos[a].name, photos[b].name); });
+    return;
+  }
+  order.sort(function(a,b){
+    var d = (photos[a].date || 0) - (photos[b].date || 0);
+    if(d) return d;
+    return photos[a].name < photos[b].name ? -1 : 1;
+  });
+  if(S.sort === 'date-desc') order.reverse();
+}
+
+/* =====================================================================
+   OBJECT URL WINDOW — keep only the slides near the gate in memory,
+   so a folder of thousands of photos doesn't sink the browser.
+   ===================================================================== */
+var WINDOW = 3;
+
+function srcFor(idx){
+  var p = photos[idx];
+  if(p.url) return p.url;
+  if(!p.objectUrl) p.objectUrl = URL.createObjectURL(p.file);
+  return p.objectUrl;
+}
+
+function trimUrls(){
+  var keep = {};
+  for(var d=-WINDOW; d<=WINDOW; d++){
+    var i = pos + d;
+    if(i >= 0 && i < order.length) keep[order[i]] = true;
+  }
+  for(var k=0;k<photos.length;k++){
+    if(photos[k].objectUrl && !keep[k]){
+      URL.revokeObjectURL(photos[k].objectUrl);
+      photos[k].objectUrl = null;
+    }
+  }
+}
+
+function preload(n){
+  for(var d=1; d<=n; d++){
+    var i = pos + d;
+    if(i < 0 || i >= order.length) continue;
+    var im = new Image();
+    im.src = srcFor(order[i]);
+  }
+}
+
+/* =====================================================================
+   ADVANCING THE TRAY
+   ===================================================================== */
+function next(dir, first){
+  if(!order.length || busy) return;
+  dir = dir || 1;
+
+  var np = pos + dir;
+  if(np >= order.length) np = 0;            /* the tray comes back around */
+  if(np < 0) np = order.length - 1;
+  pos = np;
+
+  show(order[pos], dir < 0, !!first);
+  updateCounter();
+  trimUrls();
+  preload(2);
+  if(playing) arm();
+}
+
+function show(idx, reverse, first){
+  var p = photos[idx];
+  busy = true;
+
+  var img = document.createElement('img');
+  img.className = 'slide enter' + (reverse ? ' rev' : '');
+  img.alt = '';
+  img.decoding = 'async';
+  img.src = srcFor(idx);
+
+  var old = liveEl;
+
+  function place(){
+    $('screen').appendChild(img);
+    drawDust();
+
+    if(!first && S.sound) clunk();
+    if(!first && S.mode === 'clunk'){
+      var g = $('gate');
+      g.classList.remove('blink');
+      void g.offsetWidth;                    /* restart the blackout */
+      g.classList.add('blink');
+    }
+
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        img.classList.remove('enter', 'rev');
+        img.classList.add('entering');
+
+        if(old){
+          old.classList.remove('live','entering','kb-a','kb-b','kb-c');
+          old.classList.add('exiting');
+          if(reverse) old.classList.add('rev');
+          var dead = old;
+          setTimeout(function(){ if(dead.parentNode) dead.parentNode.removeChild(dead); }, 700);
+        }
+
+        setTimeout(function(){
+          img.classList.remove('entering');
+          img.classList.add('live');
+          /* the slow creep begins only once the slide has settled */
+          if(S.kb){
+            var v = ['kb-a','kb-b','kb-c'][kbSeq++ % 3];
+            img.style.setProperty('--kbdur', Math.max(6, (S.speed/1000) + 3) + 's');
+            img.classList.add(v);
+          }
+          busy = false;
+        }, 620);
+      });
+    });
+
+    liveEl = img;
+    stampFor(p);
+  }
+
+  img.onerror = function(){
+    p.broken = true;
+    busy = false;
+    if(img.parentNode) img.parentNode.removeChild(img);
+    /* skip past anything the browser can't decode, but don't loop forever */
+    var alive = photos.some(function(q){ return !q.broken; });
+    if(alive) next(reverse ? -1 : 1);
+    else { toast('None of these photos could be displayed'); pause(); }
+  };
+
+  if(img.complete){
+    if(img.naturalWidth) place();
+    else img.onerror();
+  }else img.onload = place;
+}
+
+function stampFor(p){
+  var st = $('stamp'), cap = $('caption');
+
+  if(p.date && p.date > 86400000){
+    var d = new Date(p.date);
+    var mm = String(d.getMonth()+1).padStart(2,'0');
+    var dd = String(d.getDate()).padStart(2,'0');
+    st.textContent = "'" + String(d.getFullYear()).slice(2) + ' ' + mm + ' ' + dd;
+    st.className = 'on';
+  }else{
+    st.className = ''; st.textContent = '';
+  }
+
+  var text = p.caption || '';
+  if(text){ cap.textContent = text; cap.className = 'on'; }
+  else{ cap.className = ''; cap.textContent = ''; }
+}
+
+/* =====================================================================
+   TRANSPORT
+   ===================================================================== */
+function arm(){
+  clearTimeout(timer);
+  timer = setTimeout(function(){ next(1); }, S.speed);
+}
+function play(){
+  if(!order.length) return;
+  playing = true;
+  $('icPlay').style.display = 'none';
+  $('icPause').style.display = '';
+  arm();
+  startFan(); fanLevel(S.sound);
+  requestWake();
+  goIdle();
+}
+function pause(){
+  playing = false;
+  clearTimeout(timer);
+  $('icPlay').style.display = '';
+  $('icPause').style.display = 'none';
+  fanLevel(false);
+  releaseWake();
+  wake();
+}
+function toggle(){ playing ? pause() : play(); }
+
+function updateCounter(){
+  $('counter').textContent = order.length
+    ? (pos + 1) + ' / ' + order.length
+    : '— / —';
+  var pct = order.length ? ((pos + 1) / order.length) * 100 : 0;
+  $('track').firstElementChild.style.width = pct + '%';
+}
+
+/* =====================================================================
+   KEEP THE TV AWAKE
+   ===================================================================== */
+var wakeLock = null;
+async function requestWake(){
+  try{
+    if('wakeLock' in navigator && !wakeLock){
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', function(){ wakeLock = null; });
+    }
+  }catch(e){}
+}
+function releaseWake(){
+  try{ if(wakeLock){ wakeLock.release(); wakeLock = null; } }catch(e){}
+}
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible' && playing) requestWake();
+});
+
+/* =====================================================================
+   IDLE — hide the controls and the pointer so it's just the picture
+   ===================================================================== */
+var idleTimer = null;
+function goIdle(){ if(playing) body.classList.add('idle'); }
+function wake(){
+  body.classList.remove('idle');
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(goIdle, 3200);
+}
+['mousemove','mousedown','touchstart','wheel'].forEach(function(ev){
+  window.addEventListener(ev, wake, {passive:true});
+});
+
+function toast(msg){
+  var t = $('toast');
+  t.textContent = msg;
+  t.className = 'on';
+  clearTimeout(t._t);
+  t._t = setTimeout(function(){ t.className = ''; }, 2600);
+}
+
+/* =====================================================================
+   CONTROLS
+   ===================================================================== */
+function setBtn(el, on){ el.className = 'btn' + (on ? ' on' : ''); }
+
+$('bPlay').onclick = toggle;
+$('bNext').onclick = function(){ next(1);  if(playing) arm(); };
+$('bPrev').onclick = function(){ next(-1); if(playing) arm(); };
+
+$('speed').onchange = function(){
+  S.speed = +this.value; saveSettings();
+  if(playing) arm();
+  toast(Math.round(S.speed/1000) + ' seconds per slide');
+};
+
+$('order').onchange = function(){
+  S.sort = this.value; saveSettings();
+  if(!photos.length) return;
+  var current = pos >= 0 ? order[pos] : -1;
+  buildOrder();
+  var at = order.indexOf(current);
+  pos = at >= 0 ? at : 0;
+  updateCounter(); trimUrls();
+  toast(this.options[this.selectedIndex].text);
+};
+
+$('bSound').onclick = function(){
+  S.sound = !S.sound; saveSettings();
+  setBtn(this, S.sound);
+  if(S.sound){ startFan(); fanLevel(playing); toast('Projector sound on'); }
+  else{ fanLevel(false); toast('Projector sound off'); }
+};
+
+$('bFx').onclick = function(){
+  S.fx = !S.fx; saveSettings();
+  setBtn(this, S.fx);
+  body.classList.toggle('no-fx', !S.fx);
+  drawDust();
+  toast(S.fx ? 'Film grain on' : 'Film grain off');
+};
+
+$('bKb').onclick = function(){
+  S.kb = !S.kb; saveSettings();
+  setBtn(this, S.kb);
+  body.classList.toggle('kb', S.kb);
+  if(!S.kb && liveEl) liveEl.classList.remove('kb-a','kb-b','kb-c');
+  toast(S.kb ? 'Slow zoom on' : 'Slow zoom off');
+};
+
+$('bMode').onclick = function(){
+  S.mode = S.mode === 'clunk' ? 'dissolve' : 'clunk';
+  saveSettings();
+  applyMode();
+  toast(S.mode === 'clunk' ? 'Carousel advance' : 'Slow dissolve');
+};
+function applyMode(){
+  body.classList.toggle('mode-dissolve', S.mode === 'dissolve');
+  $('bMode').querySelector('.lbl').textContent = S.mode === 'clunk' ? 'Clunk' : 'Dissolve';
+}
+
+$('bFull').onclick = fullscreen;
+function fullscreen(){
+  var d = document, el = d.documentElement;
+  if(d.fullscreenElement || d.webkitFullscreenElement){
+    (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+  }else{
+    var fn = el.requestFullscreen || el.webkitRequestFullscreen;
+    if(fn) fn.call(el).catch(function(){});
+  }
+}
+
+$('bTray').onclick = function(){
+  pause();
+  $('tray').className = '';
+  showErr('');
+  wake();
+};
+
+/* ---- file pickers ---- */
+$('pickFolder').onclick = function(){ $('fileFolder').click(); };
+$('pickFiles').onclick  = function(){ $('fileList').click(); };
+$('fileFolder').onchange = function(){ if(this.files.length) ingest(this.files); this.value = ''; };
+$('fileList').onchange   = function(){ if(this.files.length) ingest(this.files); this.value = ''; };
+
+/* ---- drag and drop, folders included ---- */
+var dragDepth = 0;
+window.addEventListener('dragenter', function(e){
+  e.preventDefault(); dragDepth++;
+  if($('tray').className === 'hidden'){ pause(); $('tray').className = ''; }
+  $('tray').classList.add('drop');
+});
+window.addEventListener('dragover', function(e){ e.preventDefault(); });
+window.addEventListener('dragleave', function(e){
+  e.preventDefault();
+  if(--dragDepth <= 0){ dragDepth = 0; $('tray').classList.remove('drop'); }
+});
+window.addEventListener('drop', async function(e){
+  e.preventDefault();
+  dragDepth = 0;
+  $('tray').classList.remove('drop');
+  var items = e.dataTransfer.items;
+  var files = [];
+
+  if(items && items.length && items[0].webkitGetAsEntry){
+    var entries = [];
+    for(var i=0;i<items.length;i++){
+      var en = items[i].webkitGetAsEntry();
+      if(en) entries.push(en);
+    }
+    for(var k=0;k<entries.length;k++) await walk(entries[k], files);
+  }else{
+    files = Array.prototype.slice.call(e.dataTransfer.files || []);
+  }
+  if(files.length) ingest(files);
+});
+
+function walk(entry, out, depth){
+  depth = depth || 0;
+  return new Promise(function(resolve){
+    if(depth > 8) return resolve();
+    if(entry.isFile){
+      entry.file(function(f){ out.push(f); resolve(); }, function(){ resolve(); });
+    }else if(entry.isDirectory){
+      var reader = entry.createReader();
+      var all = [];
+      (function readMore(){
+        reader.readEntries(async function(batch){
+          if(!batch.length){
+            for(var i=0;i<all.length;i++) await walk(all[i], out, depth+1);
+            return resolve();
+          }
+          all = all.concat(Array.prototype.slice.call(batch));
+          readMore();
+        }, function(){ resolve(); });
+      })();
+    }else resolve();
+  });
+}
+
+/* ---- keyboard, and TV remotes that map to arrow keys ---- */
+window.addEventListener('keydown', function(e){
+  var t = e.target;
+  if(t && /INPUT|SELECT|TEXTAREA/.test(t.tagName) && e.key !== 'Escape') return;
+  /* let a focused button handle its own Space/Enter */
+  if(t && t.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter')) return;
+  var k = e.key;
+  var trayOpen = $('tray').className !== 'hidden';
+
+  if(trayOpen && k !== 'Escape' && k !== 'f' && k !== 'F') return;
+
+  switch(k){
+    case ' ': case 'Spacebar': case 'Enter': case 'MediaPlayPause':
+      e.preventDefault(); toggle(); wake(); break;
+    case 'ArrowRight': case 'ArrowDown': case 'PageDown': case 'MediaTrackNext':
+      e.preventDefault(); next(1); if(playing) arm(); wake(); break;
+    case 'ArrowLeft': case 'ArrowUp': case 'PageUp': case 'MediaTrackPrevious':
+      e.preventDefault(); next(-1); if(playing) arm(); wake(); break;
+    case 'Home': if(order.length){ pos = -1; next(1); wake(); } break;
+    case 'End':  if(order.length){ pos = order.length - 2; next(1); wake(); } break;
+    case 'f': case 'F': fullscreen(); break;
+    case 'm': case 'M': $('bSound').click(); wake(); break;
+    case 'g': case 'G': $('bFx').click(); wake(); break;
+    case 'k': case 'K': $('bKb').click(); wake(); break;
+    case 'd': case 'D': $('bMode').click(); wake(); break;
+    case 's': case 'S':
+      $('order').value = 'shuffle'; $('order').onchange(); wake(); break;
+    case 'l': case 'L': $('bTray').click(); break;
+    case 'Escape':
+      if(!trayOpen && (document.fullscreenElement || document.webkitFullscreenElement)) return;
+      if(!trayOpen){ pause(); wake(); }
+      else if(photos.length){ $('tray').className = 'hidden'; play(); }
+      break;
+  }
+});
+
+/* click the picture itself to pause — the simplest control there is */
+$('room').addEventListener('click', function(e){
+  if($('tray').className !== 'hidden') return;
+  toggle(); wake();
+});
+
+/* =====================================================================
+   BOOT
+   ===================================================================== */
+var resizeT = null;
+window.addEventListener('resize', function(){
+  clearTimeout(resizeT);
+  resizeT = setTimeout(sizeDust, 160);
+});
+
+window.addEventListener('pagehide', function(){
+  photos.forEach(function(p){ if(p.objectUrl) URL.revokeObjectURL(p.objectUrl); });
+  stopFan();
+});
+
+(function init(){
+  loadSettings();
+  $('speed').value = String(S.speed);
+  $('order').value = S.sort;
+  setBtn($('bSound'), S.sound);
+  setBtn($('bFx'), S.fx);
+  setBtn($('bKb'), S.kb);
+  body.classList.toggle('no-fx', !S.fx);
+  body.classList.toggle('kb', S.kb);
+  applyMode();
+  sizeDust();
+  requestAnimationFrame(sizeDust);        /* again once layout has settled */
+  updateCounter();
+  tryManifest();
+})();
+
+})();
+</script>
+</body>
+</html>
