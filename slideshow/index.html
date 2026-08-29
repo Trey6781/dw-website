@@ -402,6 +402,10 @@
       <option value="30000">30s</option>
     </select>
 
+    <select id="year" title="Year" aria-label="Show only one year" style="display:none">
+      <option value="all">All years</option>
+    </select>
+
     <select id="order" title="Order" aria-label="Slide order">
       <option value="date">Oldest first</option>
       <option value="date-desc">Newest first</option>
@@ -501,6 +505,9 @@ var timer    = null;
 var busy     = false;
 var liveEl   = null;
 var kbSeq    = 0;
+
+var yearFilter = 'all';
+var years = [];
 
 var S = {
   speed: 7000,
@@ -733,7 +740,10 @@ function drawDust(){
    ===================================================================== */
 function readTaken(file){
   return new Promise(function(resolve){
-    var fallback = file.lastModified || 0;
+    /* {t: timestamp, exif: true} only when it is a real capture time.
+       A file's modified date is not when the photo was taken -- iOS stamps
+       Photo Library picks with the moment you exported them. */
+    var fallback = {t: file.lastModified || 0, exif: false};
     if(!/jpe?g$/i.test(file.name) && file.type !== 'image/jpeg') return resolve(fallback);
 
     var reader = new FileReader();
@@ -794,7 +804,7 @@ function readTaken(file){
         }
 
         best = scanIFD(ifd0);
-        resolve(best || fallback);
+        resolve(best ? {t: best, exif: true} : fallback);
       }catch(e){ resolve(fallback); }
     };
     reader.readAsArrayBuffer(file.slice(0, 262144));
@@ -901,7 +911,8 @@ async function ingest(files){
         file: slice[j],
         url: null,
         objectUrl: null,
-        date: dates[j] || 0,
+        date: dates[j].t || 0,
+        exact: !!dates[j].exif,
         broken: false
       };
     }
@@ -912,17 +923,44 @@ async function ingest(files){
 }
 
 function finishLoad(heic, skipped){
+  yearFilter = 'all';
+  var info = buildYears();
+
+  /* ?year=2015 -- so a Home Screen shortcut can open straight into one year */
+  try{
+    var want = new URLSearchParams(location.search).get('year');
+    if(want && years.indexOf(+want) >= 0){
+      yearFilter = want;
+      $('year').value = want;
+    }
+  }catch(e){}
+
   buildOrder();
   pos = -1;
   $('tray').className = 'hidden';
   body.classList.add('running');
   updateCounter();
   startFan();
-  var note = photos.length + ' photos loaded';
+
+  var note = order.length + ' photos loaded';
+  if(yearFilter !== 'all') note = order.length + ' photos from ' + yearFilter;
   if(heic) note += ' · ' + heic + " couldn't be opened";
   toast(note);
+
   next(1, true);
   play();
+
+  /* Say so when no capture dates could be read -- it explains a missing year
+     menu, and warns that the running order is only a guess. */
+  if(!years.length && photos.length > 1){
+    setTimeout(function(){
+      toast('No capture dates found — showing them in file order');
+    }, 3200);
+  }else if(info.undated > 0){
+    setTimeout(function(){
+      toast(info.undated + ' photo' + (info.undated === 1 ? '' : 's') + ' had no date');
+    }, 3200);
+  }
 }
 
 /* Optional: photos.json sitting next to this page, for a committed album.
@@ -941,6 +979,7 @@ async function tryManifest(){
         url: src,
         objectUrl: null,
         date: (typeof item === 'object' && item.date) ? Date.parse(item.date) || 0 : i,
+        exact: !!(typeof item === 'object' && item.date),
         caption: (typeof item === 'object' && item.caption) ? item.caption : '',
         broken: false
       };
@@ -954,8 +993,48 @@ async function tryManifest(){
 /* =====================================================================
    ORDERING
    ===================================================================== */
+/* Only photos with a real EXIF capture time get a year. Grouping by file
+   modified date would file a 2015 photo under whenever it was exported. */
+function buildYears(){
+  var counts = {};
+  photos.forEach(function(p){
+    if(!p.exact || !p.date) return;
+    var y = new Date(p.date).getFullYear();
+    if(y > 1900 && y < 2200) counts[y] = (counts[y] || 0) + 1;
+  });
+  years = Object.keys(counts).map(Number).sort(function(a, b){ return a - b; });
+
+  var sel = $('year');
+  var undated = photos.length - years.reduce(function(n, y){ return n + counts[y]; }, 0);
+  sel.innerHTML = '';
+
+  var all = document.createElement('option');
+  all.value = 'all';
+  all.textContent = 'All years (' + photos.length + ')';
+  sel.appendChild(all);
+
+  years.forEach(function(y){
+    var o = document.createElement('option');
+    o.value = String(y);
+    o.textContent = y + '  (' + counts[y] + ')';
+    sel.appendChild(o);
+  });
+
+  /* A year filter with nothing to filter on would just mislead. */
+  sel.style.display = years.length > 1 ? '' : 'none';
+  return {undated: undated, counts: counts};
+}
+
 function buildOrder(){
   order = photos.map(function(_, i){ return i; });
+
+  if(yearFilter !== 'all'){
+    var want = +yearFilter;
+    order = order.filter(function(i){
+      var p = photos[i];
+      return p.exact && p.date && new Date(p.date).getFullYear() === want;
+    });
+  }
 
   if(S.sort === 'shuffle'){
     for(var i=order.length-1;i>0;i--){
@@ -1106,7 +1185,7 @@ function show(idx, reverse, first){
 function stampFor(p){
   var st = $('stamp'), cap = $('caption');
 
-  if(p.date && p.date > 86400000){
+  if(p.exact && p.date > 86400000){
     var d = new Date(p.date);
     var mm = String(d.getMonth()+1).padStart(2,'0');
     var dd = String(d.getDate()).padStart(2,'0');
@@ -1222,6 +1301,23 @@ $('order').onchange = function(){
   pos = at >= 0 ? at : 0;
   updateCounter(); trimUrls();
   toast(this.options[this.selectedIndex].text);
+};
+
+$('year').onchange = function(){
+  yearFilter = this.value;
+  if(!photos.length) return;
+  buildOrder();
+  if(!order.length){                      /* cannot happen from the menu, but be safe */
+    yearFilter = 'all'; this.value = 'all'; buildOrder();
+    toast('No photos from that year');
+  }
+  pos = -1;
+  updateCounter();
+  trimUrls();
+  next(1, true);
+  toast(yearFilter === 'all'
+    ? 'Showing all years'
+    : order.length + ' photos from ' + yearFilter);
 };
 
 $('bSound').onclick = function(){

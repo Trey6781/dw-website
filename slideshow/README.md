@@ -68,6 +68,7 @@ as arrow keys.
 | `K` | Slow zoom (Ken Burns) on/off |
 | `D` | Advance style — carousel clunk vs. slow dissolve |
 | `S` | Shuffle |
+| — | Year menu is in the control bar |
 | `L` | Load different photos |
 | `Esc` | Pause |
 
@@ -77,10 +78,18 @@ themselves a few seconds into playback.
 ## What it does with your photos
 
 - **Orders them by when they were taken**, reading the EXIF `DateTimeOriginal`
-  out of each JPEG. Files without EXIF fall back to their modified date. You can
-  switch to newest-first, file name, or shuffle.
+  out of each JPEG. You can switch to newest-first, file name, or shuffle.
+- **Filters to a single year.** Load the whole library, then pick a year from
+  the menu to watch just that one — it lists only years actually present, with
+  a count. `?year=2015` in the URL opens straight into that year, so you can
+  keep a Home Screen shortcut per year.
 - **Stamps the capture date** in the corner, like the orange date-back burn-in
-  on a drugstore print.
+  on a drugstore print — but **only when the date is a real capture time.**
+  A file's modified date is not when the photo was taken; iOS stamps Photo
+  Library exports with the moment you exported them. Photos without readable
+  EXIF get no stamp and no year rather than a confidently wrong one, and if
+  nothing in the batch has a capture date the year menu hides itself and the
+  page says so.
 - **Keeps only a few slides in memory at a time**, so a folder with thousands of
   photos won't sink the browser.
 - **Skips anything it can't display** rather than showing a blank slide.
