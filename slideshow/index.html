@@ -864,12 +864,15 @@ async function ingest(files){
   showErr('');
   var list = [], heic = 0, skipped = 0;
 
-  var heicFiles = [];
+  var heicFiles = [], empty = 0;
   for(var i=0;i<files.length;i++){
     var f = files[i];
     if(!f) continue;
     if(/^\./.test(f.name || '')) continue;                 /* macOS ._ sidecars etc. */
     if(!isImage(f)){ skipped++; continue; }
+    /* An iCloud photo that never finished downloading arrives empty. Say so
+       rather than letting it disappear from the show without explanation. */
+    if(f.size === 0){ empty++; continue; }
     if(HEIC_RE.test(f.name || '')) heicFiles.push(f);
     list.push(f);
   }
@@ -885,6 +888,15 @@ async function ingest(files){
     }
   }
 
+  if(!list.length && empty){
+    showErr('<b>' + empty + ' photo' + (empty === 1 ? '' : 's') +
+      " didn't finish downloading from iCloud.</b><br><br>" +
+      'iCloud keeps full-size photos in the cloud and fetches them only when ' +
+      'something asks for them. Connect to Wi-Fi, give Photos a minute to catch ' +
+      'up, and try again.');
+    return;
+  }
+
   if(!list.length){
     var msg = 'No photos found in that selection.';
     if(heic) msg += '<br><br><b>' + heic + ' HEIC photo' + (heic===1?'':'s') +
@@ -897,7 +909,9 @@ async function ingest(files){
     return;
   }
 
-  toast('Reading ' + list.length + ' photos…');
+  var big = list.length > 40;
+  toast(big ? 'Reading photos… 0 / ' + list.length
+            : 'Reading ' + list.length + ' photos…', big);
 
   /* Pull capture dates a chunk at a time so a big folder stays responsive */
   var out = new Array(list.length);
@@ -905,6 +919,8 @@ async function ingest(files){
   for(var s=0; s<list.length; s+=CHUNK){
     var slice = list.slice(s, s+CHUNK);
     var dates = await Promise.all(slice.map(readTaken));
+    if(big) toast('Reading photos… ' + Math.min(s + CHUNK, list.length) +
+                  ' / ' + list.length, true);
     for(var j=0;j<slice.length;j++){
       out[s+j] = {
         name: slice[j].name,
@@ -919,10 +935,10 @@ async function ingest(files){
   }
 
   photos = out;
-  finishLoad(heic, skipped);
+  finishLoad(heic, skipped, empty);
 }
 
-function finishLoad(heic, skipped){
+function finishLoad(heic, skipped, empty){
   yearFilter = 'all';
   var info = buildYears();
 
@@ -945,6 +961,7 @@ function finishLoad(heic, skipped){
   var note = order.length + ' photos loaded';
   if(yearFilter !== 'all') note = order.length + ' photos from ' + yearFilter;
   if(heic) note += ' · ' + heic + " couldn't be opened";
+  if(empty) note += ' · ' + empty + " didn't download";
   toast(note);
 
   next(1, true);
@@ -1269,12 +1286,12 @@ function wake(){
   window.addEventListener(ev, wake, {passive:true});
 });
 
-function toast(msg){
+function toast(msg, sticky){
   var t = $('toast');
   t.textContent = msg;
   t.className = 'on';
   clearTimeout(t._t);
-  t._t = setTimeout(function(){ t.className = ''; }, 2600);
+  if(!sticky) t._t = setTimeout(function(){ t.className = ''; }, 2600);
 }
 
 /* =====================================================================

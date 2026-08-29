@@ -20,31 +20,64 @@ genuinely want them public.
 
 ## Watching it on the TV
 
-### From an iPhone (photos already on your phone)
+### From an iPhone (including photos that live in iCloud)
+
+**Photos in iCloud are not a problem.** iCloud Photos syncs into the Photos app,
+and the picker reads from Photos — so it already sees your whole iCloud library
+and fetches full-size originals on demand. Nothing needs downloading first.
 
 1. Open `davenportandwillingham.com/slideshow/` in Safari.
 2. Tap **Share → Add to Home Screen**. This matters: launched from the Home
    Screen the page runs without Safari's address and toolbar, so the picture
    fills the whole screen. iPhone Safari has no full-screen button, so this is
    the only way to get there.
-3. Open it from the Home Screen, tap **Choose photos**, and select from your
-   library. You can multi-select.
+3. Open it from the Home Screen, tap **Choose photos**, and select.
 4. Turn the phone **sideways** — landscape fills a TV properly.
 5. **AirPlay-mirror** to an Apple TV: swipe down for Control Centre → Screen
    Mirroring. (Chromecast users: cast the screen from a Chrome tab instead.)
 
-The page holds a screen wake lock while playing so the phone shouldn't sleep
-mid-show.
+#### Picking one year without endless scrolling
 
-**Picking a lot of photos at once is the weak spot here.** The iOS picker gets
-tedious past a few dozen, and a phone has far less memory than a laptop. For a
-big show — a hundred photos or more — the next option is better.
+The iOS picker opens newest-first, so hunting for an old year by scrolling is
+miserable. Make an album once instead:
+
+*Photos → Library → Years → **2015** → Select → Add To Album → New Album.*
+
+Then in the slideshow picker, tap **Albums**, choose that album, and Select All.
+The year menu in the control bar is a useful double-check afterwards.
+
+#### If photos are slow to appear
+
+With *Optimise iPhone Storage* on, full-size photos live in iCloud and are
+fetched only when something asks for them. Reading capture dates forces that
+download, so a large selection can sit for a while — the page shows a running
+count so you can tell it is working, not stuck.
+
+Anything that never finishes downloading arrives empty. Rather than letting it
+vanish from the show, the page counts those and tells you, so you know to get on
+Wi-Fi and try again rather than wondering where photos went.
+
+**Big batches are still the weak spot here.** The iOS picker gets tedious past a
+few dozen, every one has to come down from iCloud, and a phone has far less
+memory than a laptop. For a whole year, the next option is better.
 
 ### From a computer (best picture, more setup)
 
-Get the photos onto a laptop once (AirDrop, iCloud Photos, or a cable), plug it
-into the TV over HDMI, open the page, choose the folder, and press `F`. This
-handles thousands of photos comfortably and gives the best image quality.
+Get the photos onto a laptop once, plug it into the TV over HDMI, open the page,
+choose the folder, and press `F`. This handles thousands of photos comfortably
+and gives the best image quality.
+
+Ways to get a year out of iCloud onto a computer:
+
+- **icloud.com/photos** in any browser — sign in, select the photos, Download.
+  Works on Windows and Mac.
+- **Mac Photos app** — select the year, then *File → Export → Export Unmodified
+  Originals*. Keeps EXIF, so the running order and date stamps stay right.
+- **iCloud for Windows** — syncs a Photos folder into File Explorer that you can
+  point the folder picker straight at.
+
+Export originals rather than anything "optimised" or resized, or you may lose
+the EXIF capture dates that the ordering and the year menu depend on.
 
 ### Other routes
 
