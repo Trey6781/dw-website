@@ -6,6 +6,13 @@
 <meta name="robots" content="noindex, nofollow" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%2315161a'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%23ffb347'/%3E%3Ccircle cx='12.5' cy='12.5' r='3.5' fill='%23fff6e2'/%3E%3C/svg%3E" />
 <title>The Carousel — Family Slide Projector</title>
+<meta name="theme-color" content="#0a0a0b" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Carousel" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<link rel="manifest" href="manifest.webmanifest" />
 <meta name="description" content="An old-school carousel slide projector for your family photos. Runs entirely on your own device." />
 <style>
   :root{
@@ -318,6 +325,19 @@
     color:#8fd6a4;font-size:13.5px;font-weight:600;
   }
   .privacy svg{width:16px;height:16px;fill:currentColor;flex:0 0 auto}
+  #iosTip{
+    display:none;margin:24px auto 0;max-width:460px;
+    padding:15px 20px;border-radius:14px;text-align:left;
+    background:rgba(255,179,71,.08);border:1px solid rgba(255,179,71,.26);
+    color:#e2c79b;font-size:14.5px;line-height:1.65;
+  }
+  #iosTip b{color:#ffd9a3}
+  .ios-ico{
+    display:inline-block;padding:1px 8px;border-radius:6px;
+    background:#2a2c33;border:1px solid #3d404a;color:#cfd3da;
+    font-size:12.5px;font-weight:650;
+  }
+  body.ios #keyHint{display:none}
   #err{margin-top:18px;color:#ff9a9a;font-size:14px;line-height:1.6;display:none}
   #err.on{display:block}
   input[type=file]{display:none}
@@ -422,7 +442,7 @@
   <div class="panel">
     <div class="lens"></div>
     <h1>The <em>Carousel</em></h1>
-    <p class="sub">
+    <p class="sub" id="sub">
       Load a folder of family photos and watch them the old way —
       <b>ka-chunk</b>, one slide at a time, dust and all.
     </p>
@@ -443,8 +463,16 @@
       Your photos never leave this device — nothing is uploaded.
     </div>
 
-    <p class="hint">
-      …or just drag a folder anywhere onto this page.<br><br>
+    <p class="hint" id="dragHint">…or just drag a folder anywhere onto this page.</p>
+
+    <div id="iosTip">
+      <b>Watching on the TV?</b>
+      Tap <span class="ios-ico">Share</span> → <b>Add to Home Screen</b> first.
+      Opening it from the Home Screen hides Safari's bars so the picture fills
+      the screen. Then turn the phone sideways and AirPlay-mirror it to the TV.
+    </div>
+
+    <p class="hint" id="keyHint">
       <kbd>Space</kbd> play/pause &nbsp; <kbd>←</kbd> <kbd>→</kbd> back/forward &nbsp;
       <kbd>F</kbd> full screen &nbsp; <kbd>M</kbd> sound &nbsp; <kbd>G</kbd> grain &nbsp; <kbd>K</kbd> zoom
     </p>
@@ -486,6 +514,18 @@ var S = {
 var $ = function(id){ return document.getElementById(id); };
 var body = document.body;
 
+/* ---- what this device can actually do ----------------------------------
+   iPhone Safari has no Fullscreen API and no folder picker, so the UI has
+   to adapt rather than offer buttons that quietly do nothing.            */
+var IS_IOS = /iP(hone|od|ad)/.test(navigator.platform || '') ||
+             (/Mac/.test(navigator.platform || '') && navigator.maxTouchPoints > 1) ||
+             /iPhone|iPad|iPod/.test(navigator.userAgent || '');
+var STANDALONE = !!(window.navigator.standalone ||
+             (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
+var CAN_FULLSCREEN = !!(document.documentElement.requestFullscreen ||
+                        document.documentElement.webkitRequestFullscreen);
+var CAN_DIRECTORY = ('webkitdirectory' in document.createElement('input')) && !IS_IOS;
+
 /* =====================================================================
    SETTINGS PERSISTENCE  (best-effort — private windows can throw)
    ===================================================================== */
@@ -502,7 +542,23 @@ function saveSettings(){
 /* =====================================================================
    PROJECTOR SOUND — synthesized, so there are no audio files to ship
    ===================================================================== */
-var actx = null, fanGain = null, fanNodes = [];
+var actx = null, fanGain = null, fanNodes = [], unlocked = false;
+
+/* Safari will not start audio except from inside a real gesture handler, and
+   the gesture is spent by the time our async file reading finishes -- so grab
+   it on the tap itself. */
+function unlockAudio(){
+  var ctx = audio();
+  if(!ctx) return;
+  if(ctx.state === 'suspended') ctx.resume();
+  if(unlocked) return;
+  try{
+    var b = ctx.createBuffer(1, 1, 22050);
+    var src = ctx.createBufferSource();
+    src.buffer = b; src.connect(ctx.destination); src.start(0);
+    unlocked = true;
+  }catch(e){}
+}
 
 function audio(){
   if(actx) return actx;
@@ -759,13 +815,33 @@ function parseExifDate(s){
 /* =====================================================================
    LOADING PHOTOS
    ===================================================================== */
-var IMG_RE = /\.(jpe?g|png|gif|webp|avif|bmp|svg)$/i;
+var IMG_RE  = /\.(jpe?g|png|gif|webp|avif|bmp|svg|heic|heif)$/i;
 var HEIC_RE = /\.(heic|heif)$/i;
 
 function isImage(f){
   if(!f) return false;
   if(f.type && f.type.indexOf('image/') === 0) return true;
   return IMG_RE.test(f.name || '');
+}
+
+/* Ask the browser directly whether it can decode this file, rather than
+   guessing from the file name. iOS usually converts Photo Library picks to
+   JPEG on the way out, so a name ending in .HEIC may well display fine. */
+function probeDecode(file){
+  return new Promise(function(resolve){
+    var url = URL.createObjectURL(file), settled = false;
+    var im = new Image();
+    function done(ok){
+      if(settled) return;
+      settled = true;
+      URL.revokeObjectURL(url);
+      resolve(ok);
+    }
+    im.onload  = function(){ done(im.naturalWidth > 0); };
+    im.onerror = function(){ done(false); };
+    setTimeout(function(){ done(false); }, 5000);
+    im.src = url;
+  });
 }
 
 function showErr(html){
@@ -778,21 +854,35 @@ async function ingest(files){
   showErr('');
   var list = [], heic = 0, skipped = 0;
 
+  var heicFiles = [];
   for(var i=0;i<files.length;i++){
     var f = files[i];
     if(!f) continue;
-    if(HEIC_RE.test(f.name || '')){ heic++; continue; }
-    if(!isImage(f)){ skipped++; continue; }
     if(/^\./.test(f.name || '')) continue;                 /* macOS ._ sidecars etc. */
+    if(!isImage(f)){ skipped++; continue; }
+    if(HEIC_RE.test(f.name || '')) heicFiles.push(f);
     list.push(f);
+  }
+
+  /* If anything still carries a HEIC name, decode one to find out whether
+     this browser can handle them. One probe settles the whole batch. */
+  if(heicFiles.length){
+    toast('Checking photo format…');
+    var canDecodeHeic = await probeDecode(heicFiles[0]);
+    if(!canDecodeHeic){
+      heic = heicFiles.length;
+      list = list.filter(function(x){ return !HEIC_RE.test(x.name || ''); });
+    }
   }
 
   if(!list.length){
     var msg = 'No photos found in that selection.';
-    if(heic) msg += '<br><br><b>' + heic + ' HEIC file' + (heic===1?'':'s') +
-      ' were skipped.</b> Most browsers can\'t display Apple\'s HEIC format. ' +
-      'On iPhone: <i>Settings → Camera → Formats → Most Compatible</i> saves new photos as JPEG, ' +
-      'or export the existing ones as JPEG first.';
+    if(heic) msg += '<br><br><b>' + heic + ' HEIC photo' + (heic===1?'':'s') +
+      ' couldn\'t be opened.</b> This browser can\'t decode Apple\'s HEIC format.' +
+      '<br><br>On an iPhone, picking straight from <b>Photo Library</b> normally ' +
+      'converts them for you — going through the <i>Files</i> app does not. ' +
+      'Otherwise set <i>Settings → Camera → Formats → Most Compatible</i> so new ' +
+      'photos are saved as JPEG.';
     showErr(msg);
     return;
   }
@@ -829,7 +919,7 @@ function finishLoad(heic, skipped){
   updateCounter();
   startFan();
   var note = photos.length + ' photos loaded';
-  if(heic) note += ' · ' + heic + ' HEIC skipped';
+  if(heic) note += ' · ' + heic + " couldn't be opened";
   toast(note);
   next(1, true);
   play();
@@ -1187,8 +1277,11 @@ $('bTray').onclick = function(){
 };
 
 /* ---- file pickers ---- */
-$('pickFolder').onclick = function(){ $('fileFolder').click(); };
-$('pickFiles').onclick  = function(){ $('fileList').click(); };
+$('pickFolder').onclick = function(){ unlockAudio(); $('fileFolder').click(); };
+$('pickFiles').onclick  = function(){ unlockAudio(); $('fileList').click(); };
+['pointerdown','touchend'].forEach(function(ev){
+  window.addEventListener(ev, unlockAudio, {passive:true});
+});
 $('fileFolder').onchange = function(){ if(this.files.length) ingest(this.files); this.value = ''; };
 $('fileList').onchange   = function(){ if(this.files.length) ingest(this.files); this.value = ''; };
 
@@ -1313,6 +1406,23 @@ window.addEventListener('pagehide', function(){
   body.classList.toggle('no-fx', !S.fx);
   body.classList.toggle('kb', S.kb);
   applyMode();
+
+  /* A full-screen button that cannot go full screen is worse than none.
+     On iPhone, Add to Home Screen is the real answer, so say that instead. */
+  if(!CAN_FULLSCREEN) $('bFull').style.display = 'none';
+  if(!CAN_DIRECTORY){
+    $('pickFolder').style.display = 'none';
+    $('pickFiles').className = 'cta cta-primary';
+    $('pickFiles').innerHTML =
+      "<svg viewBox='0 0 24 24'><path d='M21 19V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5z'/></svg>" +
+      'Choose photos';
+    $('dragHint').style.display = 'none';
+    $('sub').innerHTML = 'Pick photos from your library and watch them the old ' +
+      'way — <b>ka-chunk</b>, one slide at a time, dust and all.';
+  }
+  if(IS_IOS && !STANDALONE) $('iosTip').style.display = 'block';
+  if(IS_IOS) body.classList.add('ios');
+
   sizeDust();
   requestAnimationFrame(sizeDust);        /* again once layout has settled */
   updateCounter();

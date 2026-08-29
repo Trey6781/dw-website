@@ -20,17 +20,37 @@ genuinely want them public.
 
 ## Watching it on the TV
 
-Pick whichever is easiest:
+### From an iPhone (photos already on your phone)
 
-- **Smart TV browser** — open `davenportandwillingham.com/slideshow/`, then use
-  the TV's own file picker if it has one. Support varies a lot by TV.
-- **Laptop plugged into the TV via HDMI** *(most reliable, best picture)* —
-  open the page, choose your photo folder, press `F` for full screen.
-- **Cast a browser tab** from Chrome to a Chromecast / Google TV.
-- **Apple TV** — AirPlay-mirror a Mac or iPad.
+1. Open `davenportandwillingham.com/slideshow/` in Safari.
+2. Tap **Share → Add to Home Screen**. This matters: launched from the Home
+   Screen the page runs without Safari's address and toolbar, so the picture
+   fills the whole screen. iPhone Safari has no full-screen button, so this is
+   the only way to get there.
+3. Open it from the Home Screen, tap **Choose photos**, and select from your
+   library. You can multi-select.
+4. Turn the phone **sideways** — landscape fills a TV properly.
+5. **AirPlay-mirror** to an Apple TV: swipe down for Control Centre → Screen
+   Mirroring. (Chromecast users: cast the screen from a Chrome tab instead.)
 
-The page asks for a screen wake lock while playing, so the TV shouldn't blank
-out mid-show.
+The page holds a screen wake lock while playing so the phone shouldn't sleep
+mid-show.
+
+**Picking a lot of photos at once is the weak spot here.** The iOS picker gets
+tedious past a few dozen, and a phone has far less memory than a laptop. For a
+big show — a hundred photos or more — the next option is better.
+
+### From a computer (best picture, more setup)
+
+Get the photos onto a laptop once (AirDrop, iCloud Photos, or a cable), plug it
+into the TV over HDMI, open the page, choose the folder, and press `F`. This
+handles thousands of photos comfortably and gives the best image quality.
+
+### Other routes
+
+- **Cast a Chrome tab** to a Chromecast or Google TV.
+- **Smart TV browser** — works, but TV browsers are slow and their file pickers
+  are poor. Only worth it if the TV can see a USB stick of photos.
 
 ## Controls
 
@@ -42,7 +62,7 @@ as arrow keys.
 | `Space` / `Enter` | Play / pause |
 | `←` `→` (or `↑` `↓`) | Back / forward a slide |
 | `Home` / `End` | First / last slide |
-| `F` | Full screen |
+| `F` | Full screen *(not on iPhone — see above)* |
 | `M` | Projector sound on/off |
 | `G` | Film grain and dust on/off |
 | `K` | Slow zoom (Ken Burns) on/off |
@@ -84,11 +104,20 @@ All synthesized in the browser — there are no image or audio assets to ship.
 
 ## HEIC photos
 
-iPhones save as HEIC by default and **browsers can't display HEIC**. The page
-detects them, skips them, and says so.
+iPhones save photos as HEIC by default, and browsers can't decode HEIC.
 
-To fix it, either set *Settings → Camera → Formats → **Most Compatible*** on the
-iPhone so new photos are saved as JPEG, or export the existing ones as JPEG.
+In practice this usually sorts itself out: when you pick from **Photo Library**
+in iOS Safari, iOS hands the browser a converted JPEG. Going through the
+**Files** app instead passes the raw HEIC through, which won't display.
+
+Rather than guess from the file name, the page decodes one file to find out
+whether this browser can actually read them, and only excludes them if it
+genuinely can't — then it tells you. If you do hit it, either pick from Photo
+Library rather than Files, or set *Settings → Camera → Formats → **Most
+Compatible*** so new photos are saved as JPEG.
+
+Note that this only changes *new* photos. Existing HEIC shots need exporting as
+JPEG, which the Photo Library picker generally does for you anyway.
 
 ## Optional: a committed album
 
