@@ -3,98 +3,78 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Boat Sodas — Cooler Decal Kit</title>
-<meta name="description" content="Boat Sodas cooler decal kit: die-cut vinyl badge, banner, and mini sticker artwork with print and application specs." />
+<title>Broad River Boat Soda Club — Cooler Decal Kit</title>
+<meta name="description" content="Broad River Boat Soda Club cooler decals: die-cut vinyl roundel, crest, banner, and member mini, with print and application specs." />
 <style>
   :root{
-    --navy:#0B2B45;
-    --navy-d:#071E31;
-    --cream:#F7E7C6;
-    --cream-d:#EFD39B;
-    --orange:#F2711C;
-    --coral:#E14A32;
-    --teal:#16787D;
-    --teal-l:#2FA0A0;
-    --ink:#0B2B45;
+    --navy:#0B2B45; --navy-d:#071E31; --cream:#F7E7C6; --cream-d:#EFD39B;
+    --orange:#F2711C; --gold:#F6A623; --coral:#D93D2B;
+    --river:#16787D; --river-l:#2FA0A0; --pine:#14503F;
     --rule:rgba(247,231,198,.18);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
-    background:var(--navy-d);
-    color:var(--cream);
+    background:var(--navy-d); color:var(--cream);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    line-height:1.6;
-    -webkit-font-smoothing:antialiased;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
   }
   .wrap{max-width:1080px;margin:0 auto;padding:0 16px}
   h1,h2,h3{line-height:1.12;letter-spacing:-.01em}
 
-  /* header */
   .hero{
     background:
-      linear-gradient(180deg,rgba(7,30,49,.72),rgba(7,30,49,.92)),
+      linear-gradient(180deg,rgba(7,30,49,.7),rgba(7,30,49,.93)),
       repeating-linear-gradient(135deg,#0B2B45 0 26px,#0d3252 26px 52px);
-    border-bottom:4px solid var(--orange);
-    padding:56px 0 48px;
-    text-align:center;
+    border-bottom:4px solid var(--orange); padding:54px 0 46px; text-align:center;
   }
   .kicker{
     display:inline-block;background:var(--orange);color:#fff;
     font-size:12px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;
     padding:6px 14px;border-radius:999px;margin-bottom:18px;
   }
-  .hero h1{font-size:clamp(30px,6vw,52px);font-weight:900;letter-spacing:-.5px}
-  .hero p{margin:16px auto 0;max-width:600px;color:#cfd8dd;font-size:clamp(15px,2.2vw,18px)}
+  .hero h1{font-size:clamp(28px,5.4vw,50px);font-weight:900;letter-spacing:-.5px}
+  .hero .sub{margin-top:14px;color:var(--gold);font-weight:800;letter-spacing:2px;
+             text-transform:uppercase;font-size:clamp(12px,2vw,14px)}
+  .hero p{margin:14px auto 0;max-width:620px;color:#cfd8dd;font-size:clamp(15px,2.2vw,18px)}
 
-  section{padding:56px 0}
+  section{padding:54px 0}
   section + section{border-top:1px solid var(--rule)}
-  .head{max-width:680px;margin-bottom:32px}
+  .head{max-width:700px;margin-bottom:30px}
   .head .eyebrow{color:var(--orange);font-weight:800;letter-spacing:2px;text-transform:uppercase;font-size:12px}
   .head h2{font-size:clamp(23px,3.6vw,32px);font-weight:900;margin-top:8px}
   .head p{color:#b6c3cc;margin-top:10px;font-size:16px}
 
-  /* artwork boards */
-  .boards{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;align-items:stretch}
-  .board{
-    background:
-      repeating-linear-gradient(90deg,#d8c9a8 0 78px,#d2c19d 78px 80px),
-      #d8c9a8;
-    border-radius:16px;padding:26px;
-    box-shadow:0 14px 34px rgba(0,0,0,.4);
-    display:flex;align-items:center;justify-content:center;
-  }
-  .board.stack{flex-direction:column;gap:26px}
-  .board img{display:block;width:100%;height:auto;filter:drop-shadow(0 6px 12px rgba(0,0,0,.28))}
-  .board .b-badge{max-width:340px}
-  .board .b-banner{max-width:420px}
-  .board .b-mini{max-width:150px}
-  .cap{
-    margin-top:10px;font-size:13px;color:#9fb0ba;text-align:center;
-    letter-spacing:.4px;
-  }
+  .boards{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch}
   .piece{display:flex;flex-direction:column}
-  .board{flex:1}
-
-  /* mockups */
-  .mocks{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
-  .mock{
-    background:linear-gradient(180deg,#123b5c,#0b2b45);
-    border:1px solid var(--rule);border-radius:16px;padding:20px;
+  .board{
+    flex:1;
+    background:repeating-linear-gradient(90deg,#d8c9a8 0 78px,#d2c19d 78px 80px),#d8c9a8;
+    border-radius:16px;padding:26px;box-shadow:0 14px 34px rgba(0,0,0,.4);
+    display:flex;align-items:center;justify-content:center;gap:26px;
   }
+  .board.col{flex-direction:column}
+  .board img{display:block;width:100%;height:auto;filter:drop-shadow(0 6px 12px rgba(0,0,0,.28))}
+  .b-roundel{max-width:330px} .b-crest{max-width:250px}
+  .b-banner{max-width:420px} .b-mini{max-width:140px}
+  .cap{margin-top:10px;font-size:13px;color:#9fb0ba;text-align:center;letter-spacing:.3px}
+
+  .mocks{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+  .mock{background:linear-gradient(180deg,#123b5c,#0b2b45);border:1px solid var(--rule);
+        border-radius:16px;padding:20px}
   .mock svg{display:block;width:100%;height:auto}
   .mock h3{font-size:16px;font-weight:800;margin-bottom:4px}
   .mock p{font-size:14px;color:#a9bac4}
   .mock .meta{margin-top:14px;border-top:1px solid var(--rule);padding-top:12px}
 
-  /* palette */
   .swatches{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
   .sw{border-radius:12px;overflow:hidden;background:#0f3350;border:1px solid var(--rule)}
-  .sw .chip{height:78px}
+  .sw .chip{height:76px}
   .sw .lbl{padding:10px 12px;font-size:12px;line-height:1.35}
   .sw .lbl b{display:block;font-size:13px}
   .sw .lbl code{color:#9fb0ba;font-size:11.5px;letter-spacing:.4px}
+  .tints{margin-top:12px;font-size:13.5px;color:#9fb0ba}
+  .tints code{color:var(--cream-d)}
 
-  /* spec table */
   table{width:100%;border-collapse:collapse;font-size:15px}
   th,td{text-align:left;padding:13px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
   th{color:var(--orange);font-size:12px;letter-spacing:1.6px;text-transform:uppercase;font-weight:800}
@@ -102,19 +82,21 @@
   td{color:#c4d0d8}
 
   .notes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:10px}
-  .note{background:#0f3350;border:1px solid var(--rule);border-left:4px solid var(--teal-l);border-radius:12px;padding:18px}
+  .note{background:#0f3350;border:1px solid var(--rule);border-left:4px solid var(--river-l);
+        border-radius:12px;padding:18px}
   .note h3{font-size:15px;font-weight:800;margin-bottom:6px}
-  .note p{font-size:14px;color:#b6c3cc}
   .note ul{margin:6px 0 0 18px;font-size:14px;color:#b6c3cc}
   .note li{margin-top:5px}
 
-  footer{background:var(--navy);border-top:4px solid var(--orange);padding:26px 0;text-align:center;font-size:13.5px;color:#9fb0ba}
+  footer{background:var(--navy);border-top:4px solid var(--orange);padding:26px 0;
+         text-align:center;font-size:13.5px;color:#9fb0ba}
 
   @media (max-width:820px){
     .boards,.mocks{grid-template-columns:1fr}
     .swatches{grid-template-columns:repeat(3,1fr)}
     .notes{grid-template-columns:1fr}
     td:first-child{width:130px}
+    .board{flex-direction:column}
   }
 </style>
 </head>
@@ -123,8 +105,9 @@
 <div class="hero">
   <div class="wrap">
     <span class="kicker">Cooler Decal Kit</span>
-    <h1>Boat Sodas</h1>
-    <p>A sun-and-surf badge built to live on a cooler lid — heavy letterforms, four flat colors, and a white die-cut border that reads from across the dock.</p>
+    <h1>Broad River Boat Soda Club</h1>
+    <div class="sub">If anybody asks, it&rsquo;s a soda</div>
+    <p>A river-club patch built for the lid of a cooler: pines, a sunset on the water, and a tallboy standing right in the middle of it.</p>
   </div>
 </div>
 
@@ -132,20 +115,33 @@
   <div class="wrap">
     <div class="head">
       <div class="eyebrow">The artwork</div>
-      <h2>Three pieces, one lockup</h2>
-      <p>The badge is the hero. The banner fills the long front panel where a circle would float. The mini drops the ring type so it still reads at two inches.</p>
+      <h2>Four pieces</h2>
+      <p>The roundel and the crest are two takes on the same club mark — one scene-forward, one type-forward. Pick whichever your crew likes and put the other on the truck. The banner fills the long front panel, and the mini is the member sticker.</p>
     </div>
     <div class="boards">
       <div class="piece">
-        <div class="board"><img class="b-badge" src="boat-sodas-badge-4.5in.svg" alt="Boat Sodas circular badge decal"></div>
-        <div class="cap">Badge — 4.5&Prime; circle &middot; lid or front panel</div>
+        <div class="board">
+          <img class="b-roundel" src="brbsc-roundel-4.5in.svg" alt="Broad River Boat Soda Club roundel decal">
+        </div>
+        <div class="cap">Roundel &mdash; 4.5&Prime; circle &middot; the lid mark</div>
       </div>
       <div class="piece">
-        <div class="board stack">
-          <img class="b-banner" src="boat-sodas-banner-6x2in.svg" alt="Boat Sodas banner decal">
-          <img class="b-mini" src="boat-sodas-mini-2in.svg" alt="Boat Sodas mini decal">
+        <div class="board">
+          <img class="b-crest" src="brbsc-crest-4x5in.svg" alt="Broad River Boat Soda Club crest decal">
         </div>
-        <div class="cap">Banner — 6 &times; 2&Prime; &middot; Mini — 2&Prime; circle</div>
+        <div class="cap">Crest &mdash; 4 &times; 5&Prime; shield &middot; carries the punchline</div>
+      </div>
+      <div class="piece">
+        <div class="board col">
+          <img class="b-banner" src="brbsc-banner-6x2in.svg" alt="Broad River Boat Soda Club banner decal">
+        </div>
+        <div class="cap">Banner &mdash; 6 &times; 2&Prime; &middot; front panel</div>
+      </div>
+      <div class="piece">
+        <div class="board col">
+          <img class="b-mini" src="brbsc-mini-2in.svg" alt="BRBSC monogram mini decal">
+        </div>
+        <div class="cap">Mini &mdash; 2&Prime; BRBSC monogram &middot; tumblers, rod tubes, back glass</div>
       </div>
     </div>
   </div>
@@ -156,12 +152,12 @@
     <div class="head">
       <div class="eyebrow">In place</div>
       <h2>On the cooler</h2>
-      <p>Shown on a 45-quart rotomolded cooler. Keep decals off the lid gasket, the hinge, and the latch keepers — anything that flexes or gets pried will lift a corner.</p>
+      <p>Shown on a 45-quart rotomolded cooler. Keep decals off the lid gasket, the hinge, and the latch keepers &mdash; anything that flexes or gets pried will lift a corner by the second trip.</p>
     </div>
     <div class="mocks">
 
       <div class="mock">
-        <svg viewBox="0 0 600 430" role="img" aria-label="Cooler lid, top view, with the badge decal centered">
+        <svg viewBox="0 0 600 430" role="img" aria-label="Cooler lid, top view, with the roundel centered">
           <ellipse cx="300" cy="404" rx="234" ry="16" fill="#061727" opacity=".55"/>
           <rect x="58" y="52" width="484" height="330" rx="40" fill="#9aa3ab"/>
           <rect x="58" y="52" width="484" height="322" rx="40" fill="#c3cad1"/>
@@ -174,29 +170,25 @@
             <rect x="120" y="306" width="64" height="12" rx="6"/>
             <rect x="416" y="306" width="64" height="12" rx="6"/>
           </g>
-          <image href="boat-sodas-badge-4.5in.svg" x="188" y="101" width="224" height="224"/>
+          <image href="brbsc-roundel-4.5in.svg" x="188" y="101" width="224" height="224"/>
           <rect x="58" y="52" width="484" height="322" rx="40" fill="none" stroke="#8a939b" stroke-width="3"/>
         </svg>
         <div class="meta">
           <h3>Lid, dead center</h3>
-          <p>Badge at 4.5&Prime;. Center it on the flat recess between the handle lugs — on a Tundra-style lid that is the only truly flat real estate.</p>
+          <p>Roundel at 4.5&Prime;. The flat recess between the handle lugs is the only truly flat real estate on a Tundra-style lid. The crest drops into the same spot at 4 &times; 5&Prime;.</p>
         </div>
       </div>
 
       <div class="mock">
         <svg viewBox="0 0 600 430" role="img" aria-label="Cooler front view with the banner decal on the body">
           <ellipse cx="300" cy="404" rx="226" ry="15" fill="#061727" opacity=".55"/>
-          <!-- body -->
           <path d="M96,166 H504 L486,368 Q484,384 468,384 H132 Q116,384 114,368 Z" fill="#b3bbc3"/>
           <path d="M96,166 H504 L498,232 H102 Z" fill="#bcc4cb"/>
-          <!-- lid -->
           <rect x="84" y="104" width="432" height="62" rx="22" fill="#c9d0d6"/>
           <rect x="84" y="104" width="432" height="26" rx="13" fill="#d4dade"/>
           <line x1="96" y1="166" x2="504" y2="166" stroke="#8f989f" stroke-width="3"/>
-          <!-- side handle lugs -->
           <rect x="70" y="196" width="30" height="74" rx="14" fill="#8d969e"/>
           <rect x="500" y="196" width="30" height="74" rx="14" fill="#8d969e"/>
-          <!-- latches -->
           <g fill="#3f464d">
             <rect x="186" y="140" width="54" height="86" rx="14"/>
             <rect x="360" y="140" width="54" height="86" rx="14"/>
@@ -205,12 +197,9 @@
             <rect x="198" y="152" width="30" height="20" rx="8"/>
             <rect x="372" y="152" width="30" height="20" rx="8"/>
           </g>
-          <!-- decal -->
-          <image href="boat-sodas-banner-6x2in.svg" x="186" y="258" width="228" height="76"/>
-          <!-- drain plug -->
+          <image href="brbsc-banner-6x2in.svg" x="186" y="258" width="228" height="76"/>
           <circle cx="470" cy="344" r="15" fill="#8d969e"/>
           <circle cx="470" cy="344" r="7" fill="#6d757c"/>
-          <!-- feet -->
           <rect x="140" y="384" width="74" height="14" rx="6" fill="#6d757c"/>
           <rect x="386" y="384" width="74" height="14" rx="6" fill="#6d757c"/>
         </svg>
@@ -228,17 +217,19 @@
   <div class="wrap">
     <div class="head">
       <div class="eyebrow">Palette</div>
-      <h2>Four colors that survive a summer</h2>
-      <p>Flat spot-style colors, no gradients or fine tints — they cut cleanly in vinyl, print consistently, and hold up when the sun bleaches everything else.</p>
+      <h2>Colors that survive a summer on the water</h2>
+      <p>Flat spot-style colors, no gradients or fine tints &mdash; they cut cleanly in vinyl, print consistently, and hold up when the sun bleaches everything else on the boat.</p>
     </div>
     <div class="swatches">
-      <div class="sw"><div class="chip" style="background:#0B2B45"></div><div class="lbl"><b>Harbor Navy</b><code>#0B2B45</code></div></div>
+      <div class="sw"><div class="chip" style="background:#0B2B45"></div><div class="lbl"><b>River Navy</b><code>#0B2B45</code></div></div>
       <div class="sw"><div class="chip" style="background:#F2711C"></div><div class="lbl"><b>Sunset Orange</b><code>#F2711C</code></div></div>
-      <div class="sw"><div class="chip" style="background:#16787D"></div><div class="lbl"><b>Deep Water Teal</b><code>#16787D</code></div></div>
+      <div class="sw"><div class="chip" style="background:#14503F"></div><div class="lbl"><b>Pine Green</b><code>#14503F</code></div></div>
+      <div class="sw"><div class="chip" style="background:#16787D"></div><div class="lbl"><b>Broad River Teal</b><code>#16787D</code></div></div>
       <div class="sw"><div class="chip" style="background:#F7E7C6"></div><div class="lbl"><b>Sun-Bleached Cream</b><code>#F7E7C6</code></div></div>
-      <div class="sw"><div class="chip" style="background:#E14A32"></div><div class="lbl"><b>Cooler Coral</b><code>#E14A32</code></div></div>
-      <div class="sw"><div class="chip" style="background:#FFFFFF"></div><div class="lbl"><b>Die-Cut White</b><code>#FFFFFF</code></div></div>
+      <div class="sw"><div class="chip" style="background:#D93D2B"></div><div class="lbl"><b>Can Coral</b><code>#D93D2B</code></div></div>
     </div>
+    <p class="tints">Plus three supporting tints: <code>#F6A623</code> water shimmer, <code>#2FA0A0</code> river highlight,
+      <code>#0E3B2E</code> back treeline, and <code>#FFFFFF</code> for the die-cut border.</p>
   </div>
 </section>
 
@@ -250,39 +241,39 @@
     </div>
     <table>
       <tr><th>Item</th><th>Spec</th></tr>
-      <tr><td>Sizes</td><td>Badge 4.5&Prime; dia. &middot; Banner 6 &times; 2&Prime; &middot; Mini 2&Prime; dia. — all measured over the white cut border.</td></tr>
+      <tr><td>Sizes</td><td>Roundel 4.5&Prime; dia. &middot; Crest 4 &times; 5&Prime; &middot; Banner 6 &times; 2&Prime; &middot; Mini 2&Prime; dia. &mdash; all measured over the white cut border.</td></tr>
       <tr><td>Material</td><td>Cast vinyl (Oracal 751 / 3M IJ180) for rotomolded and curved lids; calendared (Oracal 651) is acceptable only on flat panels.</td></tr>
-      <tr><td>Laminate</td><td>Gloss UV-blocking overlaminate. Non-negotiable — unlaminated orange is the first thing to fade.</td></tr>
-      <tr><td>Cut</td><td>Contour die cut on the outside of the white border, which is ~0.09&Prime; (2.3&nbsp;mm) wide at full size. Do not cut to the navy.</td></tr>
+      <tr><td>Laminate</td><td>Gloss UV-blocking overlaminate. Non-negotiable &mdash; unlaminated orange is the first thing to fade.</td></tr>
+      <tr><td>Cut</td><td>Contour die cut on the outside of the white border, ~0.09&Prime; (2.3&nbsp;mm) wide at full size. Do not cut to the navy.</td></tr>
       <tr><td>Bleed</td><td>Artwork already carries the border as bleed. Add 0.125&Prime; if the printer requires it outside the cut line.</td></tr>
-      <tr><td>Color</td><td>Build to the hex values above. For screen print or spot color, match Navy to PMS 539, Orange to PMS 165, Teal to PMS 7717, Cream to PMS 7499.</td></tr>
-      <tr><td>Files</td><td>Vector SVG, no external fonts — the wordmark is outlined paths, so nothing substitutes at the RIP. Small ring type uses a bold system face; outline it before cutting.</td></tr>
-      <tr><td>Durability</td><td>5–7 years outdoor with laminate. Hand wash only; avoid pressure washers and dishwashers.</td></tr>
+      <tr><td>Color</td><td>Build to the hex values above. For spot color: Navy PMS 539, Orange PMS 165, Pine PMS 7484, Teal PMS 7717, Cream PMS 7499, Coral PMS 7597.</td></tr>
+      <tr><td>Files</td><td>Vector SVG with no external fonts &mdash; the BOAT SODA CLUB wordmark is outlined paths, so nothing substitutes at the RIP. Ring type and the tagline use a bold system face; outline those before cutting.</td></tr>
+      <tr><td>Durability</td><td>5&ndash;7 years outdoor with laminate. Hand wash only; avoid pressure washers and dishwashers.</td></tr>
     </table>
 
     <div class="notes">
       <div class="note">
         <h3>Surface prep</h3>
         <ul>
-          <li>Wipe with 70% isopropyl, not soap — residue kills adhesion.</li>
+          <li>Wipe with 70% isopropyl, not soap &mdash; residue kills adhesion.</li>
           <li>Apply above 50&deg;F / 10&deg;C on a fully dry lid.</li>
-          <li>Skip textured or heavily pebbled panels; they only hold at the high points.</li>
+          <li>Skip heavily pebbled panels; vinyl only holds at the high points.</li>
         </ul>
       </div>
       <div class="note">
         <h3>Application</h3>
         <ul>
           <li>Hinge with tape down the middle, peel one half, squeegee from center out.</li>
-          <li>Work firmly over the die-cut edge last so no corner is left proud.</li>
-          <li>Give it 24 hours before the cooler sees water or ice.</li>
+          <li>Work the die-cut edge last so no corner is left proud.</li>
+          <li>Give it 24 hours before the cooler sees ice or river water.</li>
         </ul>
       </div>
       <div class="note">
         <h3>Sizing by cooler</h3>
         <ul>
-          <li>20–35 qt: mini on the lid, banner on the front.</li>
-          <li>45–65 qt: badge on the lid, banner on the front.</li>
-          <li>75 qt and up: badge at 6&Prime; — scale the SVG, it is vector.</li>
+          <li>20&ndash;35 qt: mini on the lid, banner on the front.</li>
+          <li>45&ndash;65 qt: roundel or crest on the lid, banner on the front.</li>
+          <li>75 qt and up: roundel at 6&Prime; &mdash; scale freely, it is vector.</li>
         </ul>
       </div>
     </div>
@@ -290,7 +281,7 @@
 </section>
 
 <footer>
-  <div class="wrap">Boat Sodas &middot; No wake, no worries &middot; Vector source in this folder</div>
+  <div class="wrap">Broad River Boat Soda Club &middot; If anybody asks, it&rsquo;s a soda &middot; Vector source in this folder</div>
 </footer>
 
 </body>
