@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="6in" height="2in" viewBox="0 0 1200 400">
+  <title>Boat Sodas — cooler banner decal</title>
+  <desc>Die-cut banner vinyl decal, 6in x 2in including white cut border.</desc>
+  <defs>
+    <path id="gB" fill-rule="evenodd" d="M0,0 H37 C52,0 62,11 62,25 C62,39 52,50 37,50 C52,50 62,61 62,75 C62,89 52,100 37,100 H0 Z M22,20 H35 C41,20 44,24 44,30 C44,36 41,40 35,40 H22 Z M22,60 H35 C41,60 44,64 44,70 C44,76 41,80 35,80 H22 Z"/>
+    <path id="gO" fill-rule="evenodd" d="M31,0 C48,0 62,14 62,31 V69 C62,86 48,100 31,100 C14,100 0,86 0,69 V31 C0,14 14,0 31,0 Z M31,21 C40,21 44,27 44,35 V65 C44,73 40,79 31,79 C22,79 18,73 18,65 V35 C18,27 22,21 31,21 Z"/>
+    <path id="gA" fill-rule="evenodd" d="M24,0 H38 L62,100 H41 L36,78 H26 L21,100 H0 Z M31,24 L25,58 H37 Z"/>
+    <path id="gT" fill-rule="evenodd" d="M0,0 H62 V20 H42 V100 H20 V20 H0 Z"/>
+    <path id="gD" fill-rule="evenodd" d="M0,0 H33 C50,0 62,14 62,31 V69 C62,86 50,100 33,100 H0 Z M22,20 H32 C40,20 44,26 44,34 V66 C44,74 40,80 32,80 H22 Z"/>
+    <path id="gS" fill-rule="evenodd" d="M61,25 C55,9 44,0 30,0 C13,0 1,11 1,28 C1,42 10,50 26,55 L34,57.5 C41,59.5 43,62 43,67 C43,73 38,77 30,77 C22,77 15,73 10,66 L0,82 C7,93 18,100 31,100 C48,100 61,89 61,71 C61,57 52,49 36,44 L28,41.5 C21,39.5 19,37 19,32 C19,26 24,22 31,22 C38,22 44,26 47,33 Z"/>
+    <clipPath id="field"><rect x="26" y="26" width="1148" height="348" rx="44"/></clipPath>
+  </defs>
+  <rect x="0" y="0" width="1200" height="400" rx="62" fill="#FFFFFF"/>
+  <rect x="14" y="14" width="1172" height="372" rx="52" fill="#0B2B45"/>
+  <g clip-path="url(#field)">
+    <rect x="26" y="26" width="1148" height="348" fill="#F7E7C6"/>
+    <g fill="#EFD39B"><path d="M600,250 L600.0,-650.0 L800.3,-627.4 Z"/><path d="M600,250 L990.5,-560.9 L1161.1,-453.6 Z"/><path d="M600,250 L1303.6,-311.1 L1410.9,-140.5 Z"/><path d="M600,250 L1477.4,49.7 L1500.0,250.0 Z"/><path d="M600,250 L1477.4,450.3 L1410.9,640.5 Z"/><path d="M600,250 L1303.6,811.1 L1161.1,953.6 Z"/><path d="M600,250 L990.5,1060.9 L800.3,1127.4 Z"/><path d="M600,250 L600.0,1150.0 L399.7,1127.4 Z"/><path d="M600,250 L209.5,1060.9 L38.9,953.6 Z"/><path d="M600,250 L-103.6,811.1 L-210.9,640.5 Z"/><path d="M600,250 L-277.4,450.3 L-300.0,250.0 Z"/><path d="M600,250 L-277.4,49.7 L-210.9,-140.5 Z"/><path d="M600,250 L-103.6,-311.1 L38.9,-453.6 Z"/><path d="M600,250 L209.5,-560.9 L399.7,-627.4 Z"/></g>
+    <circle cx="600" cy="250" r="170" fill="none" stroke="#F7E7C6" stroke-width="12"/>
+    <circle cx="600" cy="250" r="160" fill="#F2711C"/>
+    <rect x="0" y="296" width="1200" height="120" fill="#16787D"/>
+    <rect x="0" y="296" width="1200" height="10" fill="#2FA0A0"/>
+    <path d="M-90,332 q27.5,-8 55.0,0 q27.5,8 55.0,0 q27.5,-8 55.0,0 q27.5,8 55.0,0 q27.5,-8 55.0,0 q27.5,8 55.0,0 q27.5,-8 55.0,0 q27.5,8 55.0,0 q27.5,-8 55.0,0 q27.5,8 55.0,0 q27.5,-8 55.0,0 q27.5,8 55.0,0 q27.5,-8 55.0,0 q27.5,8 55.0,0 q27.5,-8 55.0,0 q27.5,8 55.0,0 q27.5,-8 55.0,0 q27.5,8 55.0,0 q27.5,-8 55.0,0 q27.5,8 55.0,0 q27.5,-8 55.0,0 q27.5,8 55.0,0 q27.5,-8 55.0,0 q27.5,8 55.0,0 q27.5,-8 55.0,0 q27.5,8 55.0,0" fill="none" stroke="#F7E7C6" stroke-width="8" stroke-linecap="round"/>
+    <path d="M-60,378 q32.5,-8 65.0,0 q32.5,8 65.0,0 q32.5,-8 65.0,0 q32.5,8 65.0,0 q32.5,-8 65.0,0 q32.5,8 65.0,0 q32.5,-8 65.0,0 q32.5,8 65.0,0 q32.5,-8 65.0,0 q32.5,8 65.0,0 q32.5,-8 65.0,0 q32.5,8 65.0,0 q32.5,-8 65.0,0 q32.5,8 65.0,0 q32.5,-8 65.0,0 q32.5,8 65.0,0 q32.5,-8 65.0,0 q32.5,8 65.0,0 q32.5,-8 65.0,0 q32.5,8 65.0,0 q32.5,-8 65.0,0 q32.5,8 65.0,0" fill="none" stroke="#2FA0A0" stroke-width="9" stroke-linecap="round"/>
+    <g font-family="'Arial Black','Helvetica Neue',Helvetica,Arial,sans-serif" font-weight="900" fill="#F7E7C6" font-size="40"
+       letter-spacing="8" text-anchor="middle">
+      <text x="600" y="368">NO WAKE &#183; NO WORRIES</text>
+    </g>
+  </g>
+  <path fill="#0B2B45" d="M96,226 Q103.2,242.8 120,250 Q103.2,257.2 96,274 Q88.8,257.2 72,250 Q88.8,242.8 96,226 Z"/>
+  <path fill="#0B2B45" d="M1104,226 Q1111.2,242.8 1128,250 Q1111.2,257.2 1104,274 Q1096.8,257.2 1080,250 Q1096.8,242.8 1104,226 Z"/>
+  
+  <g transform="translate(160.0,112) scale(1.2536)"><g fill="#F7E7C6" stroke="#F7E7C6" stroke-width="16.0" stroke-linejoin="round"><g transform="translate(0,0)"><use href="#gB" x="0" y="0"/><use href="#gO" x="76" y="0"/><use href="#gA" x="152" y="0"/><use href="#gT" x="228" y="0"/></g><g transform="translate(336,0)"><use href="#gS" x="0" y="0"/><use href="#gO" x="76" y="0"/><use href="#gD" x="152" y="0"/><use href="#gA" x="228" y="0"/><use href="#gS" x="304" y="0"/></g></g><g fill="#0B2B45"><g transform="translate(0,0)"><use href="#gB" x="0" y="0"/><use href="#gO" x="76" y="0"/><use href="#gA" x="152" y="0"/><use href="#gT" x="228" y="0"/></g><g transform="translate(336,0)"><use href="#gS" x="0" y="0"/><use href="#gO" x="76" y="0"/><use href="#gD" x="152" y="0"/><use href="#gA" x="228" y="0"/><use href="#gS" x="304" y="0"/></g></g></g>
+</svg>
