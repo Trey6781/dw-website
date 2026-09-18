@@ -132,7 +132,7 @@ def reflection(cx, top, rows, color=GOLD):
                      f'rx="{h/2:.1f}" fill="{color}" opacity="{0.9 - i*0.11:.2f}"/>')
     return "".join(parts)
 
-def tallboy(cx, cy, w=134, h=300, rot=-7, label=True):
+def tallboy(cx, cy, w=134, h=300, rot=-7, label=True, halo=0):
     """The hero can. It is, for the record, a soda."""
     x, y = -w/2, -h/2
     ow = w * 0.055                      # outline weight
@@ -146,7 +146,13 @@ def tallboy(cx, cy, w=134, h=300, rot=-7, label=True):
                f'text-anchor="middle" font-size="{fs:.1f}" letter-spacing="0.5">'
                f'<text x="0" y="{by + bh*0.38:.1f}">BOAT</text>'
                f'<text x="0" y="{by + bh*0.88:.1f}">SODA</text></g>')
+    ring = ""
+    if halo:
+        ring = (f'<g fill="{CREAM}" stroke="{CREAM}" stroke-width="{halo*2}" stroke-linejoin="round">'
+                f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{w*0.17:.1f}"/>'
+                f'<ellipse cx="0" cy="{y+w*0.05:.1f}" rx="{w/2-w*0.02:.1f}" ry="{w*0.13:.1f}"/></g>')
     return f'''<g transform="translate({cx},{cy}) rotate({rot})">
+      {ring}
       <rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{w*0.17:.1f}" fill="{CREAM}"/>
       <rect x="{x}" y="{by:.1f}" width="{w}" height="{bh:.1f}" fill="{CORAL}"/>
       {lbl}
@@ -245,12 +251,12 @@ SH_C = ("M106,70 H694 Q730,70 730,106 V554 C730,740 602,860 400,920 "
         "C198,860 70,740 70,554 V106 Q70,70 106,70 Z")
 
 def crest():
-    shape = "M104,640 H696 L672,676 L696,712 H104 L128,676 Z"
+    shape = "M104,492 H696 L672,523 L696,554 H104 L128,523 Z"
     ribbon = (f'<path d="{shape}" fill="{NAVY}"/>'
               f'<path d="{shape}" fill="none" stroke="{CREAM}" stroke-width="5"/>'
               f'<g font-family="{ARIAL}" font-weight="900" fill="{CREAM}" font-size="28" '
               f'letter-spacing="1" text-anchor="middle">'
-              f'<text x="400" y="687">IF ANYBODY ASKS, IT&#8217;S A SODA</text></g>')
+              f'<text x="400" y="532">IF ANYBODY ASKS, IT&#8217;S A SODA</text></g>')
     write("brbsc-crest-4x5in.svg", f'''<svg xmlns="http://www.w3.org/2000/svg" width="4in" height="5in" viewBox="0 0 800 1000">
   <title>Broad River Boat Soda Club — crest decal</title>
   <desc>Die-cut shield vinyl decal, 4in x 5in including white cut border.</desc>
@@ -262,29 +268,32 @@ def crest():
   <path d="{SH_N}" fill="{NAVY}"/>
   <path d="{SH_C}" fill="{CREAM}"/>
   <g clip-path="url(#field)">
-    {sunburst(400, 372, 720, 28)}
-    <circle cx="400" cy="372" r="202" fill="none" stroke="{CREAM}" stroke-width="13"/>
-    <circle cx="400" cy="372" r="190" fill="{ORANGE}"/>
-    {pines(620, 60, 740, [64,98,78,112,88,118,84,104,70,92,62], PINE_D, 0.40)}
-    {pines(632, 44, 756, [56,86,70,100,78,106,74,90,62,82,54,78], PINE, 0.44)}
-    <rect x="40" y="628" width="720" height="330" fill="{RIVER}"/>
-    <rect x="40" y="628" width="720" height="10" fill="{RIVER_L}"/>
-    {waves(736, 760, CREAM, 8, 8, 110, 20)}
-    {waves(860, 760, RIVER_L, 9, 8, 130, 80)}
-    {tallboy(400, 800, 100, 186, -8, False)}
-    {waves(858, 760, CREAM, 9, 9, 120, 10)}
-    {drop(316, 772, 0.55)}
-    {drop(486, 752, 0.45)}
+    {sunburst(400, 300, 720, 28)}
+    <circle cx="400" cy="300" r="197" fill="none" stroke="{CREAM}" stroke-width="13"/>
+    <circle cx="400" cy="300" r="185" fill="{ORANGE}"/>
+    {pines(594, 60, 740, [30,46,36,52,40,54,38,48,32,44,30], PINE_D, 0.40)}
+    {pines(604, 44, 756, [26,40,32,46,36,48,34,42,28,38,26,36], PINE, 0.44)}
+    <rect x="40" y="604" width="720" height="360" fill="{RIVER}"/>
+    <rect x="40" y="604" width="720" height="10" fill="{RIVER_L}"/>
+    {reflection(400, 624, [(0,150,9),(24,110,8),(50,72,7)])}
+    {waves(660, 760, CREAM, 8, 8, 110, 20)}
+    {waves(752, 760, RIVER_L, 9, 8, 130, 70)}
     {ribbon}
+    <ellipse cx="400" cy="838" rx="96" ry="19" fill="{NAVY}" opacity=".28"/>
+    {tallboy(400, 705, 143, 280, -6, True, 13)}
+    {waves(822, 760, CREAM, 9, 9, 120, 10)}
+    {drop(286, 620, 0.7)}
+    {drop(520, 664, 0.58)}
+    {drop(268, 740, 0.48)}
   </g>
   <path d="{SH_C}" fill="none" stroke="{NAVY}" stroke-width="7"/>
 
-  {setline("BROAD RIVER", 400, 108, 396, NAVY)}
-  {star4(150, 138, 16, ORANGE)}
-  {star4(650, 138, 16, ORANGE)}
-  {setline("BOAT", 400, 216, 404, NAVY, CREAM, 17)}
-  {setline("SODA", 400, 348, 404, NAVY, CREAM, 17)}
-  {setline("CLUB", 400, 480, 404, NAVY, CREAM, 17)}
+  {setline("BROAD RIVER", 400, 92, 384, NAVY)}
+  {star4(152, 120, 16, ORANGE)}
+  {star4(648, 120, 16, ORANGE)}
+  {setline("BOAT", 400, 150, 300, NAVY, CREAM, 15)}
+  {setline("SODA", 400, 262, 300, NAVY, CREAM, 15)}
+  {setline("CLUB", 400, 374, 300, NAVY, CREAM, 15)}
 </svg>
 ''')
 
