@@ -16,6 +16,10 @@ visual preview, cooler mockups, palette, and the full print/cut spec.
 | `*.png` | 300 DPI transparent-background rasters for proofing and quick sharing. |
 | `index.html` | Preview, mockups, palette, and production spec sheet. |
 | `build-artwork.py` | Regenerates all four SVGs. `python3 build-artwork.py` |
+| `brbsc-vote-sheet.png` | Labeled A/B/C/D comparison image, sized to text to a group chat. |
+| `build-vote-sheet.html` | Source layout for the vote sheet; screenshot it at 1200×1460 to regenerate. |
+| `vote-page.html` | Shareable "pick the sticker" page — all four at full size plus cooler mockups. |
+| `build-vote-page.py` | Rebuilds `vote-page.html`, inlining each decal as a namespaced SVG symbol. |
 
 The roundel and the crest are two treatments of the same mark, not a first and
 second draft — pick one for the coolers and the other looks right on a truck
